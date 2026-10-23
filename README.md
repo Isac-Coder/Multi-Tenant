@@ -36,7 +36,7 @@ DATABASE_URL=postgresql://postgres.[USUARIO]:[PASSWORD]@aws-0-[REGION].pooler.su
 
 ### 4. Inicialización de la Base de Datos
 
-El proyecto está configurado para sincronizar el esquema automáticamente en desarrollo mediante `synchronize: true` en el [DataSource](src/database/data-source.ts). Para producción, usar el sistema de migraciones.
+El proyecto está configurado para sincronizar el esquema automáticamente en desarrollo mediante `synchronize: true` en el DataSource. Para producción, usar el sistema de migraciones.
 
 ## 🗄️ Migraciones
 
@@ -53,11 +53,20 @@ npm run migration:run
 npm run migration:revert
 ```
 
+## 🌐 API Endpoints
+
+La aplicación expone los siguientes endpoints básicos para la gestión multitenant:
+
+- **Tenants**: `GET /api/tenants`, `POST /api/tenants`
+- **Students**: `GET /api/students?tenantId=...`, `POST /api/students`
+- **Courses**: `GET /api/courses?tenantId=...`, `POST /api/courses`
+- **Enrollments**: `GET /api/enrollments?tenantId=...`, `POST /api/enrollments`
+
 ## 📂 Estructura del Proyecto
 
 ```
 src/
-├── app/              # Rutas y vistas de Next.js
+├── app/              # Rutas y vistas de Next.js (incluye /api)
 ├── entities/         # Modelos de datos TypeORM (Tenant, Student, Course, Enrollment)
 ├── database/
 │   ├── data-source.ts    # Configuración de conexión TypeORM

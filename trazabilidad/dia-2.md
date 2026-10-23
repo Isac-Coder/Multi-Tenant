@@ -1,7 +1,7 @@
-# Informe Día 2: Resolución de Compatibilidad ESM y Configuración de Migraciones
+# Informe Día 2: Resolución de Compatibilidad ESM, Configuración de Migraciones y Endpoints API
 
 ## Objetivo del Día
-Resolver los errores de importación de módulos causados por la coexistencia de TypeScript, ESM (`"type": "module"`) y el CLI de TypeORM, y dejar el sistema de migraciones completamente funcional.
+Resolver los errores de importación de módulos causados por la coexistencia de TypeScript, ESM (`"type": "module"`) y el CLI de TypeORM, configurar el sistema de migraciones y desarrollar la capa de API básica.
 
 ## Problema Encontrado
 
@@ -11,52 +11,31 @@ Al intentar ejecutar el comando de generación de migraciones de TypeORM, se pro
 Error: Cannot find module '/home/.../src/entities/Tenant'
 ```
 
-**Causa raíz**: El proyecto tiene `"type": "module"` en `package.json`, lo que activa el modo ES Modules de Node.js. Bajo ESM estricto, los imports deben incluir la extensión del archivo explícitamente (`.js`), incluso si el archivo fuente es `.ts`.
+**Causa raíz**: Dependencias circulares entre entidades y requerimientos de extensiones `.js` en modo ESM.
 
 ## Soluciones Aplicadas
 
-### 1. Corrección de Extensiones en Imports (`.js`)
-Se actualizaron todos los archivos de entidades y el `data-source.ts` para usar extensiones `.js` en sus imports:
-- `src/entities/Tenant.ts`
-- `src/entities/Student.ts`
-- `src/entities/Course.ts`
-- `src/entities/Enrollment.ts`
-- `src/database/data-source.ts`
+### 1. Compatibilidad ESM y Tipado
+- Actualización de importaciones en todas las entidades y `data-source.ts` usando extensiones `.js`.
+- Implementación del operador de asignación definitiva (`!`) en las propiedades de las entidades para resolver errores de inicialización de TypeScript.
+- Uso de `import type` y referencias por string en las relaciones de TypeORM para romper ciclos circulares.
 
-### 2. Operador de Asignación Definitiva (`!`)
-Se añadió el operador `!` a todas las propiedades de las entidades TypeORM (ej. `id!: string`). Esto le indica a TypeScript que TypeORM se encargará de inicializar dichas propiedades, eliminando los errores `TS2564: Property has no initializer`.
+### 2. Sistema de Migraciones
+- Configuración de scripts en `package.json` (`migration:generate`, `migration:run`, `migration:revert`) utilizando el loader de `ts-node/esm`.
+- Creación del directorio `src/database/migrations/`.
 
-### 3. Scripts de Migración en `package.json`
-Se añadieron scripts pre-configurados que encapsulan los flags necesarios para que TypeORM funcione con ESM:
-
-```json
-"typeorm": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' typeorm",
-"migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
-"migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
-"migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts"
-```
-
-### 4. Instalación de Dependencias de Desarrollo
-Se instalaron `ts-node` y `tsconfig-paths` como dependencias de desarrollo, necesarios para que el CLI de TypeORM pueda interpretar archivos TypeScript en tiempo de ejecución.
-
-## Uso de Migraciones
-
-```bash
-# Generar una migración nueva
-npm run migration:generate -- src/database/migrations/NombreDeMigracion
-
-# Aplicar migraciones pendientes a Supabase
-npm run migration:run
-
-# Revertir la última migración
-npm run migration:revert
-```
+### 3. Desarrollo de API (Endpoints)
+Implementación de rutas API en Next.js siguiendo el patrón App Router, integrando la base de datos mediante TypeORM:
+- `/api/tenants`: Gestión de academias (GET, POST).
+- `/api/students`: Gestión de alumnos con filtro por `tenantId` (GET, POST).
+- `/api/courses`: Gestión de cursos con filtro por `tenantId` (GET, POST).
+- `/api/enrollments`: Gestión de inscripciones con filtro por `tenantId` (GET, POST).
 
 ## Estado Actual
-- [x] Compatibilidad ESM resuelta en todas las entidades.
-- [x] Scripts de migración configurados en `package.json`.
-- [x] Directorio `src/database/migrations/` creado y listo para recibir migraciones.
-- [x] Toda la documentación actualizada.
+- [x] Compatibilidad ESM resuelta.
+- [x] Migraciones configuradas y funcionales.
+- [x] Endpoints básicos implementados y vinculados al esquema multitenant.
+- [x] Documentación actualizada.
 
 ---
 **Fecha:** 2026-10-23
