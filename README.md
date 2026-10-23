@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Multi-Tenant SaaS - Academias e Institutos
 
-## Getting Started
+Este es un proyecto de software como servicio (SaaS) diseñado para la gestión de múltiples academias e institutos bajo una arquitectura **Multi-tenant**.
 
-First, run the development server:
+## 🚀 Tecnologías Principales
+
+- **Frontend:** [Next.js 15+](https://nextjs.org/) (App Router)
+- **Base de Datos:** [Supabase](https://supabase.com/) (PostgreSQL)
+- **ORM:** [TypeORM](https://typeorm.io/)
+- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
+
+## 🏗️ Arquitectura de Aislamiento
+
+El proyecto utiliza una estrategia de **Shared Schema** (Esquema Compartido). Todos los datos residen en la misma base de datos, pero están aislados lógicamente mediante una columna `tenantId` en cada tabla relevante (`Students`, `Courses`, `Enrollments`).
+
+## 🛠️ Configuración del Proyecto
+
+### 1. Requisitos Previos
+
+- Node.js 20+
+- Una cuenta en Supabase con un proyecto PostgreSQL creado.
+
+### 2. Instalación
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Variables de Entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crea un archivo `.env` en la raíz del proyecto y configura tu URL de conexión de Supabase:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL=postgresql://postgres.[USUARIO]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
+```
 
-## Learn More
+### 4. Inicialización de la Base de Datos
 
-To learn more about Next.js, take a look at the following resources:
+El proyecto está configurado para sincronizar el esquema automáticamente en desarrollo mediante `synchronize: true` en el [DataSource](src/database/data-source.ts). Para producción, usar el sistema de migraciones.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗄️ Migraciones
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+El proyecto incluye scripts pre-configurados para manejar migraciones de base de datos con TypeORM:
 
-## Deploy on Vercel
+```bash
+# Generar una nueva migración a partir de cambios en las entidades
+npm run migration:generate -- src/database/migrations/NombreDeMigracion
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Ejecutar todas las migraciones pendientes
+npm run migration:run
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Revertir la última migración ejecutada
+npm run migration:revert
+```
+
+## 📂 Estructura del Proyecto
+
+```
+src/
+├── app/              # Rutas y vistas de Next.js
+├── entities/         # Modelos de datos TypeORM (Tenant, Student, Course, Enrollment)
+├── database/
+│   ├── data-source.ts    # Configuración de conexión TypeORM
+│   └── migrations/       # Archivos de migración generados
+└── features/         # Lógica de negocio organizada por dominios
+trazabilidad/         # Registro detallado de los avances diarios
+```
+
+## 📖 Documentación Adicional
+
+Para más detalles sobre el diseño, decisiones técnicas y guías de migración, consulta:
+- [Contexto General del Proyecto](./contexto.general.md)
+- [Registro del Día 1](./trazabilidad/dia-1.md)
+- [Registro del Día 2](./trazabilidad/dia-2.md)
+
+---
+Desarrollado por [Isac-Coder](https://github.com/Isac-Coder).
