@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
-import { Student } from "./Student.js";
-import { Course } from "./Course.js";
-import { Tenant } from "./Tenant.js";
+import type { Student } from "./Student.js";
+import type { Course } from "./Course.js";
+import type { Tenant } from "./Tenant.js";
 
 @Entity("enrollments")
 export class Enrollment {
@@ -17,15 +17,15 @@ export class Enrollment {
   @Column()
   tenantId!: string;
 
-  @ManyToOne(() => Student)
+  @ManyToOne("Student")
   @JoinColumn({ name: "studentId" })
   student!: Student;
 
-  @ManyToOne(() => Course, (course) => course.enrollments)
+  @ManyToOne("Course", "enrollments")
   @JoinColumn({ name: "courseId" })
   course!: Course;
 
-  @ManyToOne(() => Tenant)
+  @ManyToOne("Tenant")
   @JoinColumn({ name: "tenantId" })
   tenant!: Tenant;
 

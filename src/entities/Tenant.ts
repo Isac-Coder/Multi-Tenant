@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm";
-import { Student } from "./Student.js";
-import { Course } from "./Course.js";
+import type { Student } from "./Student.js";
+import type { Course } from "./Course.js";
 
 @Entity("tenants")
 export class Tenant {
@@ -16,9 +16,9 @@ export class Tenant {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @OneToMany(() => Student, (student) => student.tenant)
+  @OneToMany("Student", "tenant")
   students!: Student[];
 
-  @OneToMany(() => Course, (course) => course.tenant)
+  @OneToMany("Course", "tenant")
   courses!: Course[];
 }

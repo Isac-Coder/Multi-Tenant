@@ -36,7 +36,7 @@ DATABASE_URL=postgresql://postgres.[USUARIO]:[PASSWORD]@aws-0-[REGION].pooler.su
 
 ### 4. Inicialización de la Base de Datos
 
-El proyecto está configurado para sincronizar el esquema automáticamente en desarrollo mediante `synchronize: true` en el DataSource. Para producción, usar el sistema de migraciones.
+El proyecto está configurado para sincronizar el esquema automáticamente en desarrollo mediante `synchronize: true` en el [DataSource](src/database/data-source.ts). Para producción, usar el sistema de migraciones.
 
 ## 🗄️ Migraciones
 

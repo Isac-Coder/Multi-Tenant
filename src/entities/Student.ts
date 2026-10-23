@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
-import { Tenant } from "./Tenant.js";
+import type { Tenant } from "./Tenant.js";
 
 @Entity("students")
 export class Student {
@@ -15,7 +15,7 @@ export class Student {
   @Column()
   tenantId!: string;
 
-  @ManyToOne(() => Tenant, (tenant) => tenant.students)
+  @ManyToOne("Tenant", "students")
   @JoinColumn({ name: "tenantId" })
   tenant!: Tenant;
 
