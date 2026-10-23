@@ -1,10 +1,10 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import { Tenant } from "../entities/Tenant";
-import { Student } from "../entities/Student";
-import { Course } from "../entities/Course";
-import { Enrollment } from "../entities/Enrollment";
+import { Tenant } from "../entities/Tenant.js";
+import { Student } from "../entities/Student.js";
+import { Course } from "../entities/Course.js";
+import { Enrollment } from "../entities/Enrollment.js";
 
 dotenv.config();
 

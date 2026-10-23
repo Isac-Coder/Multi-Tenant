@@ -1,31 +1,31 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm";
-import { Tenant } from "./Tenant";
-import { Enrollment } from "./Enrollment";
+import { Tenant } from "./Tenant.js";
+import { Enrollment } from "./Enrollment.js";
 
 @Entity("courses")
 export class Course {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column("text")
-  description: string;
+  description!: string;
 
   @Column()
-  tenantId: string;
+  tenantId!: string;
 
   @ManyToOne(() => Tenant, (tenant) => tenant.courses)
   @JoinColumn({ name: "tenantId" })
-  tenant: Tenant;
+  tenant!: Tenant;
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.course)
-  enrollments: Enrollment[];
+  enrollments!: Enrollment[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

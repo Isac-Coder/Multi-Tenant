@@ -1,24 +1,24 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm";
-import { Student } from "./Student";
-import { Course } from "./Course";
+import { Student } from "./Student.js";
+import { Course } from "./Course.js";
 
 @Entity("tenants")
 export class Tenant {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
-  name: string;
+  name!: string;
 
   @Column({ unique: true })
-  slug: string;
+  slug!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany(() => Student, (student) => student.tenant)
-  students: Student[];
+  students!: Student[];
 
   @OneToMany(() => Course, (course) => course.tenant)
-  courses: Course[];
+  courses!: Course[];
 }
