@@ -6,16 +6,17 @@ import { Student } from "../entities/Student.js";
 import { Course } from "../entities/Course.js";
 import { Enrollment } from "../entities/Enrollment.js";
 
+
 dotenv.config();
 
 export const AppDataSource = new DataSource({
   type: "postgres",
   url: process.env.DATABASE_URL,
-  synchronize: true, // Set to false in production
+  synchronize: false, // Set to false in production
   logging: true,
   entities: [Tenant, Student, Course, Enrollment],
   subscribers: [],
-  migrations: [],
+  migrations: [import.meta.url.includes("src/database/migrations/*.ts") ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"],
 });
 
 export const initializeDatabase = async () => {
