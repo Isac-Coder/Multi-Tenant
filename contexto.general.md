@@ -40,11 +40,20 @@ En el archivo `src/database/data-source.ts`, la propiedad `synchronize: true` es
 - **Riesgo**: Puede borrar datos si se cambian nombres de columnas o tipos de datos.
 
 ### Opción B: Migraciones Controladas (Producción/Sustentable)
-Para un entorno profesional, se debe desactivar `synchronize` y usar el CLI de TypeORM:
-1. **Generar Migración**:
-   `npx typeorm migration:generate src/database/migrations/InitialSchema -d src/database/data-source.ts`
-2. **Ejecutar Migración**:
-   `npx typeorm migration:run -d src/database/data-source.ts`
+Para un entorno profesional, se debe desactivar `synchronize` y usar los scripts pre-configurados en `package.json`:
+
+```bash
+# Generar migración a partir de cambios en entidades
+npm run migration:generate -- src/database/migrations/NombreDeMigracion
+
+# Ejecutar todas las migraciones pendientes
+npm run migration:run
+
+# Revertir la última migración
+npm run migration:revert
+```
+
+Estos scripts utilizan `NODE_OPTIONS='--loader ts-node/esm --no-warnings'` internamente para compatibilidad con ES Modules.
 
 ### Pasos Críticos para la Conexión
 1. Obtener la **Connection String** en el panel de Supabase $\rightarrow$ Settings $\rightarrow$ Database.
