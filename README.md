@@ -4,83 +4,47 @@ Este es un proyecto de software como servicio (SaaS) diseñado para la gestión 
 
 ## 🚀 Tecnologías Principales
 
-- **Frontend:** [Next.js 15+](https://nextjs.org/) (App Router)
+- **Frontend/Backend:** [Next.js 15+](https://nextjs.org/) (Fullstack)
 - **Base de Datos:** [Supabase](https://supabase.com/) (PostgreSQL)
 - **ORM:** [TypeORM](https://typeorm.io/)
-- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
+- **Seguridad:** JWT, RLS (Row Level Security)
 
 ## 🏗️ Arquitectura de Aislamiento
 
-El proyecto utiliza una estrategia de **Shared Schema** (Esquema Compartido). Todos los datos residen en la misma base de datos, pero están aislados lógicamente mediante una columna `tenantId` en cada tabla relevante (`Students`, `Courses`, `Enrollments`).
+El proyecto utiliza una estrategia de **Shared Schema** (Esquema Compartido). Todos los datos residen en la misma base de datos, pero están aislados lógicamente mediante:
 
-## 🛠️ Configuración del Proyecto
+1.  **Seguridad a Nivel de Fila (RLS):** Implementada en PostgreSQL para asegurar que los usuarios solo puedan acceder a datos de su `tenantId`.
+2.  **Proxy de API:** Una capa funcional que valida el JWT de la sesión y extrae el `tenantId` de forma segura, inyectándolo en las operaciones de base de datos.
 
-### 1. Requisitos Previos
+## 🛠️ Requisitos de Robustez (En progreso)
 
-- Node.js 20+
-- Una cuenta en Supabase con un proyecto PostgreSQL creado.
+- **Idempotencia:** (Requerimiento 4.4 - Planificado) Implementación mediante el header `Idempotency-Key` en operaciones de escritura.
+- **Rate Limiting:** (Requerimiento 4.5 - Planificado) Limitación de peticiones mediante middleware de Next.js.
+- **Docker:** (Requerimiento 4.6 - Planificado) Docker Compose para entorno local.
+- **CI/CD:** (Requerimiento 4.7 - Planificado) Pipeline de despliegue automatizado.
 
-### 2. Instalación
+## 🌐 API Endpoints (Protegidos)
 
-```bash
-npm install
-```
-
-### 3. Variables de Entorno
-
-Crea un archivo `.env` en la raíz del proyecto y configura tu URL de conexión de Supabase:
-
-```env
-DATABASE_URL=postgresql://postgres.[USUARIO]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
-```
-
-### 4. Inicialización de la Base de Datos
-
-El proyecto está configurado para sincronizar el esquema automáticamente en desarrollo mediante `synchronize: true` en el DataSource. Para producción, usar el sistema de migraciones.
-
-## 🗄️ Migraciones
-
-El proyecto incluye scripts pre-configurados para manejar migraciones de base de datos con TypeORM:
-
-```bash
-# Generar una nueva migración a partir de cambios en las entidades
-npm run migration:generate -- src/database/migrations/NombreDeMigracion
-
-# Ejecutar todas las migraciones pendientes
-npm run migration:run
-
-# Revertir la última migración ejecutada
-npm run migration:revert
-```
-
-## 🌐 API Endpoints
-
-La aplicación expone los siguientes endpoints básicos para la gestión multitenant:
+La aplicación utiliza un proxy seguro para gestionar el acceso a los datos:
 
 - **Tenants**: `GET /api/tenants`, `POST /api/tenants`
-- **Students**: `GET /api/students?tenantId=...`, `POST /api/students`
-- **Courses**: `GET /api/courses?tenantId=...`, `POST /api/courses`
-- **Enrollments**: `GET /api/enrollments?tenantId=...`, `POST /api/enrollments`
+- **Students**: `GET /api/students`, `POST /api/students`
+- **Courses**: `GET /api/courses`, `POST /api/courses`
+- **Enrollments**: `GET /api/enrollments`, `POST /api/enrollments`
 
 ## 📂 Estructura del Proyecto
 
-```
-src/
-├── app/              # Rutas y vistas de Next.js (incluye /api)
-├── entities/         # Modelos de datos TypeORM (Tenant, Student, Course, Enrollment)
-├── database/
-│   ├── data-source.ts    # Configuración de conexión TypeORM
-│   └── migrations/       # Archivos de migración generados
-└── features/         # Lógica de negocio organizada por dominios
-trazabilidad/         # Registro detallado de los avances diarios
-```
+- [src/app/api](src/app/api): Endpoints de la API protegidos por el proxy.
+- [src/proxy.ts](src/proxy.ts): Capa de seguridad y validación de JWT.
+- [src/entities](src/entities): Modelos de datos TypeORM.
+- [trazabilidad](trazabilidad): Informe de avances diarios.
 
 ## 📖 Documentación Adicional
 
-Para más detalles sobre el diseño, decisiones técnicas y guías de migración, consulta:
-- [Contexto General del Proyecto](./contexto.general.md)
-- [Registro del Día 1](./trazabilidad/dia-1.md)
-- [Registro del Día 2](./trazabilidad/dia-2.md)
+- [Contexto General del Proyecto](contexto.general.md)
+- [Registro Día 1](trazabilidad/dia-1.md)
+- [Registro Día 2](trazabilidad/dia-2.md)
+- [Registro Día 3](trazabilidad/dia-3.md)
 
 ---
 Desarrollado por [Isac-Coder](https://github.com/Isac-Coder).
