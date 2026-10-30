@@ -6,9 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
     "typeorm": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' typeorm",
-    "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
+    "migration:generate": "npm run migration:generate -- ./src/database/migrations/init",
     "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts"
   },
