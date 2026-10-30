@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-export async function withProxy(request: NextRequest, handler: (req: NextRequest, tenantId: string) => Promise<NextResponse>) {
+export async function proxy(request: NextRequest, handler: (req: NextRequest, tenantId: string) => Promise<NextResponse>) {
   // 1. Obtener el token de la cookie httpOnly
   const token = request.cookies.get('token')?.value;
 
@@ -27,3 +27,5 @@ export async function withProxy(request: NextRequest, handler: (req: NextRequest
     return NextResponse.json({ error: "Invalid Token" }, { status: 401 });
   }
 }
+
+export const withProxy = proxy;

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "@/database/data-source";
 import { Enrollment } from "@/entities/Enrollment";
-import { withProxy } from "@/proxy";
+import { withProxy } from "@/lib/proxy";
 
 export async function GET(req: NextRequest) {
   return withProxy(req, async (req, tenantId) => {
     try {
+      const { AppDataSource } = await import("@/database/data-source");
       if (!AppDataSource.isInitialized) await AppDataSource.initialize();
       const enrollmentRepository = AppDataSource.getRepository(Enrollment);
       const enrollments = await enrollmentRepository.find({ where: { tenantId } });
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Missing fields" }, { status: 400 });
       }
 
+      const { AppDataSource } = await import("@/database/data-source");
       if (!AppDataSource.isInitialized) await AppDataSource.initialize();
       const enrollmentRepository = AppDataSource.getRepository(Enrollment);
       

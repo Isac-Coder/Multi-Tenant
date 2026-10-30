@@ -27,3 +27,13 @@ Implementar la seguridad robusta del sistema mediante la Seguridad a Nivel de Fi
 ---
 **Fecha:** 2026-10-30
 **Estado:** Completado ✓
+
+## 2026-10-30: Solución de errores de compilación y despliegue
+
+Se realizaron correcciones críticas para lograr el despliegue exitoso en Vercel:
+- Corregida la exportación de `proxy` en [src/lib/proxy.ts](/src/lib/proxy.ts).
+- Eliminadas extensiones `.js` de importaciones TypeScript en entidades y archivos de base de datos.
+- Ajustado [tsconfig.json](/tsconfig.json) para corregir `ignoreDeprecations`.
+- Instalado `@types/pg` para corregir errores de tipos.
+- Refactorización crítica: Se ajustó la inicialización de `AppDataSource` en las rutas API (`src/app/api/*/route.ts`) para evitar que TypeORM intentara inicializar la conexión a la base de datos durante la fase de compilación de Next.js, lo cual causaba errores de "Postgres package has not been found".
+- El build finalizó exitosamente tras estas iteraciones.

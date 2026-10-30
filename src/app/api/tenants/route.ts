@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "@/database/data-source";
 import { Tenant } from "@/entities/Tenant";
 
 export async function GET(req: NextRequest) {
   try {
+    const { AppDataSource } = await import("@/database/data-source");
     await AppDataSource.initialize();
     const tenantRepository = AppDataSource.getRepository(Tenant);
     const tenants = await tenantRepository.find();
@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { AppDataSource } = await import("@/database/data-source");
     await AppDataSource.initialize();
     const body = await req.json();
     const tenantRepository = AppDataSource.getRepository(Tenant);

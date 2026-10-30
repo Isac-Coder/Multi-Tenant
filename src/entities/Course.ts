@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm";
-import type { Tenant } from "./Tenant.js";
-import type { Enrollment } from "./Enrollment.js";
+import type { Tenant } from "./Tenant";
+import type { Enrollment } from "./Enrollment";
 
 @Entity("courses")
 export class Course {

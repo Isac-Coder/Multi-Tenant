@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "typeorm": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' typeorm",
-    "migration:generate": "npm run migration:generate -- ./src/database/migrations/init",
-    "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
-    "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
+    "m:g": "npm run migration:generate -- ./src/database/migrations/init",
+    "m:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
+    "m:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
     "cron:dont-stop": "tsx script/daily-dont-stop.ts"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@tailwindcss/turbopack": "^4",
     "@types/dotenv": "^6.1.1",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^18.0.8",

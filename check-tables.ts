@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { AppDataSource } from "./src/database/data-source.js";
+import { AppDataSource } from "./src/database/data-source";
 
 async function checkTables() {
   try {

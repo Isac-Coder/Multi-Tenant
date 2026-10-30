@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
-import type { Tenant } from "./Tenant.js";
+import type { Tenant } from "./Tenant";
 
 @Entity("students")
 export class Student {
