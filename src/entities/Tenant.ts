@@ -7,10 +7,10 @@ export class Tenant {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", unique: true })
   name!: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", unique: true })
   slug!: string;
 
   @CreateDateColumn()
