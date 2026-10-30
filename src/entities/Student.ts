@@ -6,13 +6,13 @@ export class Student {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   name!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   email!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   tenantId!: string;
 
   @ManyToOne("Tenant", "students")

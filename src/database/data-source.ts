@@ -16,7 +16,7 @@ export const AppDataSource = new DataSource({
   logging: true,
   entities: [Tenant, Student, Course, Enrollment],
   subscribers: [],
-  migrations: [import.meta.url.includes("src/database/migrations/*.ts") ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"],
+  migrations: ["src/database/migrations/*.ts"],
 });
 
 export const initializeDatabase = async () => {

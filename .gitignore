@@ -42,5 +42,4 @@ yarn-error.log*
 next-env.d.ts
 
 .gitignore
-context
 src/database/migrations/*

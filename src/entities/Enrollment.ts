@@ -8,13 +8,13 @@ export class Enrollment {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   studentId!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   courseId!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   tenantId!: string;
 
   @ManyToOne("Student")

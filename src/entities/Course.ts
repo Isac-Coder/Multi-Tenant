@@ -7,13 +7,13 @@ export class Course {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   title!: string;
 
-  @Column("text")
+  @Column({ type: "text" })
   description!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   tenantId!: string;
 
   @ManyToOne("Tenant", "courses")

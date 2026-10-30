@@ -23,13 +23,20 @@ El sistema se basa en cuatro entidades principales:
 - **Enrollment**: Relación muchos-a-muchos entre alumnos y cursos, vinculada también al tenant para seguridad.
 
 ## 5. Estructura de Carpetas
-- `src/app`: Rutas y vistas de Next.js.
+- `src/app`: Rutas y vistas de Next.js (incluye la capa de API en `/api`).
 - `src/entities`: Definiciones de tablas de TypeORM.
 - `src/database`: Configuración de conexión y DataSource.
 - `src/features`: Lógica de negocio organizada por dominios (business/courses, students, etc.).
 - `trazabilidad/`: Bitácoras diarias de progreso.
 
-## 6. Guía de Migración a Supabase
+## 6. API Endpoints
+La aplicación implementa una API REST básica para la gestión de los tenants y sus recursos:
+- **Tenants**: `/api/tenants` (Gestión de academias).
+- **Students**: `/api/students` (Requiere `tenantId` para filtrar alumnos).
+- **Courses**: `/api/courses` (Requiere `tenantId` para filtrar cursos).
+- **Enrollments**: `/api/enrollments` (Requiere `tenantId` para filtrar inscripciones).
+
+## 7. Guía de Migración a Supabase
 
 Para desplegar el esquema definido en el código hacia la base de datos de Supabase, se han establecido dos caminos:
 
