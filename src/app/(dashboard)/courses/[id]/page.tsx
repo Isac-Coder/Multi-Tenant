@@ -1,4 +1,3 @@
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
 import { Course } from "@/entities/Course";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -6,6 +5,9 @@ import Link from "next/link";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  
+  // Dynamic import to prevent build time execution
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const course = await AppDataSource.getRepository(Course).findOneBy({ id });
 

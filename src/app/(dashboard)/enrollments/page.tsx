@@ -1,5 +1,3 @@
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
-import { Enrollment } from "@/entities/Enrollment";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -7,10 +5,14 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function EnrollmentsPage() {
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const enrollmentRepo = AppDataSource.getRepository(Enrollment);
   const enrollments = await enrollmentRepo.find({
-    relations: ["student", "course"],
+    relations: {
+        student: true,
+        course: true
+    },
   });
 
   return (

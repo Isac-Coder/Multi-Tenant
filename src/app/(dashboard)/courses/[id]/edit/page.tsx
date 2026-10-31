@@ -1,4 +1,3 @@
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
 import { Course } from "@/entities/Course";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -6,6 +5,9 @@ import { Card } from "@/components/ui/Card";
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  
+  // Dynamic import to prevent build time execution of database code
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const course = await AppDataSource.getRepository(Course).findOneBy({ id });
 

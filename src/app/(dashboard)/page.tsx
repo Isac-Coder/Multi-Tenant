@@ -1,5 +1,4 @@
 
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
 import { Student } from "@/entities/Student";
 import { Course } from "@/entities/Course";
 import { Enrollment } from "@/entities/Enrollment";
@@ -7,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 export default async function Home() {
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   
   const studentRepo = AppDataSource.getRepository(Student);

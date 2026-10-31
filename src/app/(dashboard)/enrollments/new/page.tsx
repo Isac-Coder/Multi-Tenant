@@ -1,4 +1,3 @@
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
 import { Student } from "@/entities/Student";
 import { Course } from "@/entities/Course";
 import { Button } from "@/components/ui/Button";
@@ -6,6 +5,7 @@ import { Select } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
 
 export default async function NewEnrollmentPage() {
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const studentRepo = AppDataSource.getRepository(Student);
   const courseRepo = AppDataSource.getRepository(Course);
