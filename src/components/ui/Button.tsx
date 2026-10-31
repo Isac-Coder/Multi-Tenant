@@ -1,28 +1,15 @@
 import React from 'react';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
-}
-
-export const Button: React.FC<ButtonProps> = ({ 
-  children, 
-  variant = 'primary', 
-  className = '', 
-  ...props 
-}) => {
-  const baseStyles = "px-4 py-2 rounded-md font-medium transition-colors";
-  const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
-    secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
-    danger: "bg-red-600 text-white hover:bg-red-700"
+// variants: primary | secondary | ghost | danger
+export const Button = ({ variant = 'secondary', size = 'md', children, className = '', ...props }: any) => {
+  const base = 'inline-flex items-center gap-1.5 font-medium rounded-lg transition-all';
+  const sizes: any = { sm: 'px-2.5 py-1 text-xs', md: 'px-3.5 py-1.5 text-sm', lg: 'px-4 py-2 text-sm' };
+  const variants: any = {
+    primary:   'bg-accent text-white border border-accent hover:opacity-90',
+    secondary: 'bg-surface-2 text-brand-text border border-brand-border-strong hover:bg-surface-1',
+    ghost:     'bg-transparent text-brand-muted border-transparent hover:bg-surface-1 hover:text-brand-text',
+    danger:    'bg-danger-bg text-danger border border-red-200',
   };
-
-  return (
-    <button 
-      className={`${baseStyles} ${variants[variant]} ${className}`} 
-      {...props}
-    >
-      {children}
-    </button>
-  );
+  
+  return <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>{children}</button>;
 };
