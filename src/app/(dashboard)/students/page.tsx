@@ -1,4 +1,3 @@
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
 import { Student } from "@/entities/Student";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -8,6 +7,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function StudentsPage() {
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const studentRepo = AppDataSource.getRepository(Student);
   const students = await studentRepo.find();

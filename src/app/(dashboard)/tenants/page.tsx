@@ -1,4 +1,3 @@
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
 import { Tenant } from "@/entities/Tenant";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -7,6 +6,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function TenantsPage() {
+  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const tenantRepo = AppDataSource.getRepository(Tenant);
   const tenants = await tenantRepo.find();

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { Enrollment } from "@/entities/Enrollment";
 
 export default async function EnrollmentsPage() {
   const { AppDataSource, initializeDatabase } = await import("@/database/data-source");

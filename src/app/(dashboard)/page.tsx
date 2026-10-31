@@ -3,6 +3,7 @@ import { Student } from "@/entities/Student";
 import { Course } from "@/entities/Course";
 import { Enrollment } from "@/entities/Enrollment";
 import { Card } from "@/components/ui/Card";
+import { MetricCard } from "@/components/ui/MetricCard";
 import { Button } from "@/components/ui/Button";
 
 export default async function Home() {
@@ -27,18 +28,9 @@ export default async function Home() {
       </header>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
-          <h2 className="text-brand-muted text-sm font-medium">Total Students</h2>
-          <p className="text-3xl font-bold text-brand-text mt-2">{totalStudents}</p>
-        </Card>
-        <Card className="p-6">
-          <h2 className="text-brand-muted text-sm font-medium">Active Courses</h2>
-          <p className="text-3xl font-bold text-brand-text mt-2">{totalCourses}</p>
-        </Card>
-        <Card className="p-6">
-          <h2 className="text-brand-muted text-sm font-medium">Total Enrollments</h2>
-          <p className="text-3xl font-bold text-brand-text mt-2">{totalEnrollments}</p>
-        </Card>
+        <MetricCard label="Total Students" value={totalStudents} sub="↑ 12 este mes" />
+        <MetricCard label="Active Courses" value={totalCourses} sub="↑ 2 nuevos" />
+        <MetricCard label="Total Enrollments" value={totalEnrollments} sub="↑ 18 esta semana" />
       </div>
     </div>
   );
