@@ -1,48 +1,134 @@
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle, ArrowRight, Info, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { Enrollment } from "@/entities/Enrollment";
+
+const AVATAR_COLORS = [
+  "bg-teal-bg text-teal","bg-purple-bg text-purple",
+  "bg-warning-bg text-warning","bg-danger-bg text-danger","bg-accent-light text-accent"
+];
+
+function getInitials(name: string) {
+  return name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
+}
 
 export default async function EnrollmentsPage() {
   const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
-  const enrollmentRepo = AppDataSource.getRepository(Enrollment);
-  const enrollments = await enrollmentRepo.find({
-    relations: {
-        student: true,
-        course: true
-    },
+  const enrollments = await AppDataSource.getRepository(Enrollment).find({
+    relations: { student: true, course: true },
+    order: { enrolledAt: "DESC" },
   });
 
   return (
-    <div className="min-h-screen bg-surface-0 p-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-brand-text">Matrículas</h1>
-        <Link href="/enrollments/new">
-            <Button variant="primary">
-                <Plus className="w-4 h-4" /> Nueva Matrícula
-            </Button>
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-[18px] font-medium text-brand-text">Inscripciones</h1>
+          <p className="text-[13px] text-brand-muted mt-0.5">{enrollments.length} inscripciones registradas</p>
+        </div>
+        <Link href="/enrollment/new">
+          <Button variant="primary">
+            <Plus className="w-4 h-4" /> Nueva inscripción
+          </Button>
         </Link>
-      </header>
+      </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {enrollments.map((enrollment) => (
-          <Card key={enrollment.id} className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-brand-text">
-                {enrollment.student.name} 
-                <span className="text-brand-muted font-normal"> se matriculó en </span>
-                {enrollment.course.title}
-              </h3>
-              <p className="text-xs text-brand-hint">
-                Fecha: {enrollment.enrolledAt.toLocaleDateString()}
-              </p>
-            </div>
-            <Badge variant="success">Completado</Badge>
-          </Card>
+      {/* Tabs */}
+      <div className="flex gap-2 mb-4">
+        {[
+          { label: `Todas (${enrollments.length})`, active: true },
+          { label: "Activas", active: false },
+          { label: "Completadas", active: false },
+        ].map(tab => (
+          <button key={tab.label}
+            className={"px-3 py-1.5 text-[12px] rounded-full border transition-colors " +
+              (tab.active
+                ? "bg-accent-light text-accent border-accent/20 font-medium"
+                : "bg-surface-2 text-brand-muted border-brand-border hover:bg-surface-1")}>
+            {tab.label}
+          </button>
         ))}
+      </div>
+
+      {/* Table */}
+      <div className="bg-surface-2 border border-brand-border rounded-card overflow-hidden mb-4">
+        {enrollments.length === 0 ? (
+          <div className="py-16 text-center">
+            <ClipboardList className="w-10 h-10 text-brand-hint mx-auto mb-3 opacity-40" />
+            <p className="text-brand-muted text-sm mb-4">Sin inscripciones registradas aún</p>
+            <Link href="/enrollment/new">
+              <Button variant="primary" size="sm"><Plus className="w-4 h-4" /> Primera inscripción</Button>
+            </Link>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-brand-border">
+                {["Idempotency-Key","Estudiante","Curso","Fecha","Estado"].map(h => (
+                  <th key={h} className="text-left text-[11px] font-medium uppercase tracking-[0.05em] text-brand-hint px-4 py-2.5">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-brand-border">
+              {enrollments.map((e, i) => {
+                const initials = getInitials(e.student.name);
+                const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
+                const shortKey = "idk_" + e.id.replace(/-/g,"").slice(0,7);
+                return (
+                  <tr key={e.id} className="hover:bg-surface-1 transition-colors">
+                    <td className="px-4 py-3">
+                      <code className="text-[11px] bg-surface-1 border border-brand-border px-1.5 py-0.5 rounded font-mono text-brand-muted">
+                        {shortKey}
+                      </code>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className={"w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold flex-shrink-0 " + color}>
+                          {initials}
+                        </div>
+                        <span className="text-[13px] text-brand-text">{e.student.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-[13px] text-brand-muted">{e.course.title}</td>
+                    <td className="px-4 py-3 text-[12px] text-brand-muted">
+                      {new Date(e.enrolledAt).toLocaleDateString("es-CO")}
+                    </td>
+                    <td className="px-4 py-3"><Badge variant="accent">Activa</Badge></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Idempotency demo */}
+      <div className="bg-surface-2 border border-brand-border rounded-card p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <Info className="w-4 h-4 text-brand-muted" />
+          <h3 className="text-[13px] font-medium text-brand-text">Idempotencia en acción</h3>
+        </div>
+        <p className="text-[12px] text-brand-muted mb-3">
+          La misma inscripción enviada dos veces con la misma clave — solo se crea un registro.
+        </p>
+        <div className="bg-surface-1 border border-brand-border rounded-lg p-4 space-y-2">
+          {[
+            { icon: <CheckCircle className="w-3.5 h-3.5 text-success" />, req: "POST /api/enrollments", key: "idk_4f8a12b", badge: "201 Created", bv: "success" as const, muted: false },
+            { icon: <ArrowRight className="w-3.5 h-3.5 text-brand-hint" />, req: "POST /api/enrollments (reintento)", key: "idk_4f8a12b", badge: "200 OK (cached)", bv: "accent" as const, muted: true },
+          ].map((row, i) => (
+            <div key={i} className={"flex items-center gap-2 py-1.5 border-b border-brand-border last:border-0 " + (row.muted ? "opacity-70" : "")}>
+              {row.icon}
+              <span className="flex-1 text-[11px] font-mono text-brand-muted">{row.req}</span>
+              <code className="text-[10px] bg-surface-2 border border-brand-border px-1.5 py-0.5 rounded font-mono">{row.key}</code>
+              <Badge variant={row.bv}>{row.badge}</Badge>
+            </div>
+          ))}
+          <p className="text-[11px] text-brand-hint pt-1">Mismo resultado devuelto · ningún registro duplicado en la base de datos</p>
+        </div>
       </div>
     </div>
   );

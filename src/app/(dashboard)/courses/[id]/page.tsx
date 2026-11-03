@@ -1,44 +1,73 @@
 import { Course } from "@/entities/Course";
-import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
-  // Dynamic import to prevent build time execution
   const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
   await initializeDatabase();
   const course = await AppDataSource.getRepository(Course).findOneBy({ id });
 
-  if (!course) return <div className="p-8">Curso no encontrado</div>;
+  if (!course) return (
+    <div className="p-6 text-center">
+      <p className="text-brand-muted">Curso no encontrado</p>
+      <Link href="/courses"><Button variant="ghost" className="mt-3">← Volver</Button></Link>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-surface-0 p-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-brand-text">Detalle del Curso</h1>
-        <div className="flex gap-2">
-            <Link href={`/courses/${id}/edit`}>
-                <Button variant="secondary">Editar</Button>
-            </Link>
-            <Link href="/courses">
-                <Button variant="ghost">Volver</Button>
-            </Link>
-        </div>
-      </header>
+    <div className="p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Link href="/courses">
+          <button className="flex items-center gap-1.5 text-[13px] text-brand-muted hover:text-brand-text transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Cursos
+          </button>
+        </Link>
+        <span className="text-brand-border">/</span>
+        <h1 className="text-[18px] font-medium text-brand-text">Detalle del curso</h1>
+      </div>
 
-      <Card className="p-6 max-w-lg">
-        <div className="space-y-4">
+      <div className="max-w-lg space-y-4">
+        <div className="bg-surface-2 border border-brand-border rounded-card p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-accent-light flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <h2 className="text-[16px] font-medium text-brand-text">{course.title}</h2>
+                <p className="text-[12px] text-brand-hint">ID: {course.id.slice(0,8)}…</p>
+              </div>
+            </div>
+            <Badge variant="success">Activo</Badge>
+          </div>
+
+          <div className="space-y-3 border-t border-brand-border pt-4">
             <div>
-                <label className="text-xs font-medium text-brand-muted">Título</label>
-                <p className="text-brand-text font-semibold text-lg">{course.title}</p>
+              <p className="text-[11px] font-medium text-brand-muted mb-1">Descripción</p>
+              <p className="text-[13px] text-brand-text leading-relaxed">{course.description}</p>
             </div>
             <div>
-                <label className="text-xs font-medium text-brand-muted">Descripción</label>
-                <p className="text-brand-text">{course.description}</p>
+              <p className="text-[11px] font-medium text-brand-muted mb-1">Capacidad</p>
+              <p className="text-[13px] text-brand-text">0 / 60 estudiantes</p>
+              <div className="h-1 bg-brand-border rounded-full mt-1.5">
+                <div className="h-full bg-accent-mid rounded-full" style={{ width: "0%" }} />
+              </div>
             </div>
+          </div>
         </div>
-      </Card>
+
+        <div className="flex gap-2">
+          <Link href={`/courses/${id}/edit`}>
+            <Button variant="primary">Editar curso</Button>
+          </Link>
+          <Link href="/courses">
+            <Button variant="secondary">Volver al catálogo</Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
