@@ -29,3 +29,8 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   return { error: "Credenciales inválidas" };
 }
+
+export async function logoutAction() {
+  (await cookies()).delete("auth-token");
+  return { success: true };
+}

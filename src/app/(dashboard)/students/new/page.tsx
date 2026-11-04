@@ -1,9 +1,22 @@
+"use client";
+import { useActionState, useEffect } from "react";
+import { createStudentAction } from "@/app/actions/students";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ArrowLeft, Key } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NewStudentPage() {
+  const [state, action, pending] = useActionState(createStudentAction, null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/students");
+    }
+  }, [state, router]);
+
   return (
     <div className="p-6">
       <div className="flex items-center gap-3 mb-6">
@@ -19,24 +32,25 @@ export default function NewStudentPage() {
       <div className="max-w-lg">
         <div className="bg-surface-2 border border-brand-border rounded-card p-6 shadow-sm">
           <h2 className="text-[14px] font-medium text-brand-text mb-4">Datos del estudiante</h2>
-          <form className="space-y-4">
+          <form action={action} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Input label="Nombre *" name="firstName" placeholder="Nombre" required />
               <Input label="Apellido *" name="lastName" placeholder="Apellido" required />
             </div>
             <Input label="Correo electrónico *" name="email" type="email" placeholder="nombre@email.com" required />
-            <Input label="Teléfono" name="phone" placeholder="+57 300 000 0000" />
+            <Input label="Teléfono" name="phone" placeholder="3000000000" />
 
-            <div className="flex items-start gap-2 bg-accent-light text-accent text-xs p-2.5 rounded-lg border-l-[3px] border-accent-mid">
-              <Key className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              Idempotency-Key generada automáticamente. Doble envío no crea duplicados.
-            </div>
+            {state?.error && (
+              <p className="text-danger text-xs">{state.error}</p>
+            )}
 
             <div className="flex justify-end gap-2.5 pt-2">
               <Link href="/students">
                 <Button variant="ghost">Cancelar</Button>
               </Link>
-              <Button variant="primary" type="submit">Guardar estudiante</Button>
+              <Button variant="primary" type="submit" disabled={pending}>
+                {pending ? "Guardando..." : "Guardar estudiante"}
+              </Button>
             </div>
           </form>
         </div>

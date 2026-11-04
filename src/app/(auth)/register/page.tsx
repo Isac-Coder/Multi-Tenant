@@ -51,15 +51,6 @@ export default function RegisterPage() {
           <p className="text-[13px] text-brand-muted mb-5">Esto creará tu tenant con datos completamente aislados.</p>
 
           <form className="space-y-4">
-            <Input label="Nombre completo" name="name" placeholder="Ej. Juan Pérez" required />
-
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="Email" name="email" type="email" placeholder="tu@email.com" required />
-              <Input label="Contraseña" name="password" type="password" placeholder="••••••••" required />
-            </div>
-
-            <div className="h-px bg-brand-border" />
-
             <div>
               <label className="text-xs font-medium text-brand-muted block mb-1">
                 <Building2 className="w-3 h-3 inline mr-1" />
@@ -101,13 +92,8 @@ export default function RegisterPage() {
             </div>
 
             {/* Idempotency notice */}
-            <div className="flex items-start gap-2 bg-accent-light text-accent text-xs p-2.5 rounded-lg border-l-[3px] border-accent-mid">
-              <Key className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span><strong>Idempotencia:</strong> Este registro usa <code className="bg-accent/10 px-1 rounded">Idempotency-Key</code> — puedes enviarlo varias veces de forma segura.</span>
-            </div>
-
             <div className="flex justify-end gap-2.5 pt-1">
-              <Link href="/login">
+              <Link href="/signup">
                 <Button variant="secondary">Atrás</Button>
               </Link>
               <Button variant="primary" type="submit">

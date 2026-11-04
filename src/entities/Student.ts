@@ -12,6 +12,9 @@ export class Student {
   @Column({ type: "varchar" })
   email!: string;
 
+  @Column({ type: "varchar", nullable: true })
+  phone!: string;
+
   @Column({ type: "uuid" })
   tenantId!: string;
 

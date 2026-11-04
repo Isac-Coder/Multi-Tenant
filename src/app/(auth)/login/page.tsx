@@ -25,7 +25,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-7">
           <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center mx-auto mb-2.5">
-            <div className="grid grid-cols-2 gap-0.5 w-4 h-4">
+            <div className="grid grid-cols-2 gap-0.5 w-3.5 h-3.5">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="rounded-[2px] bg-white opacity-90 w-1.5 h-1.5" />
               ))}
@@ -33,12 +33,6 @@ export default function LoginPage() {
           </div>
           <h1 className="text-[17px] font-semibold text-brand-text">EduTenant</h1>
           <p className="text-xs text-brand-muted mt-0.5">Inicia sesión en tu academia</p>
-        </div>
-
-        {/* Security badge */}
-        <div className="flex items-start gap-2 bg-accent-light text-accent text-xs p-2.5 rounded-lg border-l-[3px] border-accent-mid mb-5">
-          <Lock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-          Sesión guardada en cookie httpOnly — no expuesta en localStorage
         </div>
 
         <form action={action} className="space-y-4">

@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "typeorm": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' typeorm",
-    "m:g": "npm run migration:generate -- ./src/database/migrations/init",
-    "m:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
-    "m:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
+    "m:g": "npx typeorm migration:generate -d src/database/data-source.ts init",
+    "m:run": "npx typeorm migration:run -d src/database/data-source.ts",
+    "m:revert": "npx typeorm migration:revert -d src/database/data-source.ts",
     "cron:dont-stop": "tsx script/daily-dont-stop.ts"
   },
   "dependencies": {

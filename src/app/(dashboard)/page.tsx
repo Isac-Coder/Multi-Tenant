@@ -17,7 +17,15 @@ export default async function Home() {
   const courseRepo = AppDataSource.getRepository(Course);
   const enrollmentRepo = AppDataSource.getRepository(Enrollment);
 
-  const [totalStudents, totalCourses, totalEnrollments, recentEnrollments] = await Promise.all([
+  const [
+    totalStudents,
+    totalCourses,
+    totalEnrollments,
+    recentEnrollments,
+    activeStudentsThisMonth,
+    newCoursesThisMonth,
+    newEnrollmentsThisWeek
+  ] = await Promise.all([
     studentRepo.count(),
     courseRepo.count(),
     enrollmentRepo.count(),
@@ -26,12 +34,21 @@ export default async function Home() {
       order: { enrolledAt: "DESC" },
       take: 5,
     }),
+    studentRepo.createQueryBuilder("student")
+      .where("student.createdAt >= :date", { date: new Date(new Date().setDate(new Date().getDate() - 30)) })
+      .getCount(),
+    courseRepo.createQueryBuilder("course")
+      .where("course.createdAt >= :date", { date: new Date(new Date().setDate(new Date().getDate() - 30)) })
+      .getCount(),
+    enrollmentRepo.createQueryBuilder("enrollment")
+      .where("enrollment.enrolledAt >= :date", { date: new Date(new Date().setDate(new Date().getDate() - 7)) })
+      .getCount(),
   ]);
 
   const metrics = [
-    { label: "Estudiantes activos", value: totalStudents, sub: "↑ 12 este mes", subColor: "text-success", icon: Users, iconBg: "bg-accent-light", iconColor: "text-accent" },
-    { label: "Cursos activos",      value: totalCourses,  sub: "↑ 2 nuevos",    subColor: "text-success", icon: BookOpen, iconBg: "bg-teal-bg", iconColor: "text-teal" },
-    { label: "Inscripciones",       value: totalEnrollments, sub: "↑ 18 esta semana", subColor: "text-accent", icon: ClipboardList, iconBg: "bg-purple-bg", iconColor: "text-purple" },
+    { label: "Estudiantes activos", value: totalStudents, sub: `↑ ${activeStudentsThisMonth} este mes`, subColor: "text-success", icon: Users, iconBg: "bg-accent-light", iconColor: "text-accent" },
+    { label: "Cursos activos",      value: totalCourses,  sub: `↑ ${newCoursesThisMonth} nuevos`,    subColor: "text-success", icon: BookOpen, iconBg: "bg-teal-bg", iconColor: "text-teal" },
+    { label: "Inscripciones",       value: totalEnrollments, sub: `↑ ${newEnrollmentsThisWeek} esta semana`, subColor: "text-accent", icon: ClipboardList, iconBg: "bg-purple-bg", iconColor: "text-purple" },
     { label: "Tasa de finalización", value: "74%", sub: "↓ 3% vs mes anterior", subColor: "text-warning", icon: TrendingUp, iconBg: "bg-warning-bg", iconColor: "text-warning" },
   ];
 

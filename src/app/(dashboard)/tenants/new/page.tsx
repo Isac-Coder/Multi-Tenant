@@ -1,9 +1,22 @@
+"use client";
+import { useActionState, useEffect } from "react";
+import { createTenantAction } from "@/app/actions/tenants";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ArrowLeft, Key, Shield } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NewTenantPage() {
+  const [state, action, pending] = useActionState(createTenantAction, null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/tenants");
+    }
+  }, [state, router]);
+
   return (
     <div className="p-6">
       <div className="flex items-center gap-3 mb-6">
@@ -23,30 +36,25 @@ export default function NewTenantPage() {
             Se creará un schema aislado en la base de datos para esta academia.
           </p>
 
-          <form className="space-y-4">
+          <form action={action} className="space-y-4">
             <Input label="Nombre de la academia *" name="name" placeholder="Ej. Instituto de Idiomas Prestige" required />
             <div>
               <Input label="Slug único *" name="slug" placeholder="ej. instituto-prestige" required />
               <p className="text-[11px] text-brand-hint mt-1">slug.edutenant.app</p>
             </div>
 
-            <div className="flex items-start gap-2 bg-accent-light text-accent text-xs p-2.5 rounded-lg border-l-[3px] border-accent-mid">
-              <Shield className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              Los datos de este tenant estarán completamente aislados de otros tenants.
-            </div>
 
-            <div className="flex items-start gap-2 bg-accent-light text-accent text-xs p-2.5 rounded-lg border-l-[3px] border-accent-mid">
-              <Key className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              Operación idempotente — usar la misma{" "}
-              <code className="bg-accent/10 px-1 rounded">Idempotency-Key</code>{" "}
-              no creará duplicados.
-            </div>
+            {state?.error && (
+              <p className="text-danger text-xs">{state.error}</p>
+            )}
 
             <div className="flex justify-end gap-2.5 pt-2">
               <Link href="/tenants">
                 <Button variant="ghost">Cancelar</Button>
               </Link>
-              <Button variant="primary" type="submit">Crear tenant</Button>
+              <Button variant="primary" type="submit" disabled={pending}>
+                {pending ? "Creando..." : "Crear tenant"}
+              </Button>
             </div>
           </form>
         </div>

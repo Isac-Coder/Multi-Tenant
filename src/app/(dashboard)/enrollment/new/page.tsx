@@ -43,14 +43,6 @@ export default async function NewEnrollmentPage() {
               ))}
             </Select>
 
-            <div className="flex items-start gap-2 bg-accent-light text-accent text-xs p-2.5 rounded-lg border-l-[3px] border-accent-mid">
-              <Key className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span>
-                <strong>Idempotencia activa:</strong> Si envías este formulario dos veces,
-                solo se creará una inscripción. Usamos{" "}
-                <code className="bg-accent/10 px-1 rounded">Idempotency-Key</code> automáticamente.
-              </span>
-            </div>
 
             <div className="flex justify-end gap-2.5 pt-2">
               <Link href="/enrollment">

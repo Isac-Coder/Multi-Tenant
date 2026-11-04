@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, BookOpen, ClipboardList,
-  Building2, Settings
+  Building2, Settings, LogOut
 } from 'lucide-react';
+import { logoutAction } from '@/app/actions/auth';
 
 const menuItems = [
   { name: 'Dashboard',      icon: LayoutDashboard, href: '/' },
@@ -17,6 +18,11 @@ const menuItems = [
 
 export const Sidebar = () => {
   const pathname = usePathname();
+
+  const handleLogout = async () => {
+    await logoutAction();
+    window.location.href = '/login';
+  };
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
@@ -84,6 +90,16 @@ export const Sidebar = () => {
           <Settings className="w-4 h-4 flex-shrink-0" />
           Configuración
         </Link>
+        <button
+          onClick={async () => {
+            await logoutAction();
+            window.location.href = '/login';
+          }}
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[13px] transition-colors text-brand-muted hover:bg-surface-1 hover:text-brand-text w-full"
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          Cerrar sesión
+        </button>
       </div>
     </aside>
   );

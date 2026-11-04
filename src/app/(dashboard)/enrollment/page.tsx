@@ -106,30 +106,6 @@ export default async function EnrollmentsPage() {
         )}
       </div>
 
-      {/* Idempotency demo */}
-      <div className="bg-surface-2 border border-brand-border rounded-card p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <Info className="w-4 h-4 text-brand-muted" />
-          <h3 className="text-[13px] font-medium text-brand-text">Idempotencia en acción</h3>
-        </div>
-        <p className="text-[12px] text-brand-muted mb-3">
-          La misma inscripción enviada dos veces con la misma clave — solo se crea un registro.
-        </p>
-        <div className="bg-surface-1 border border-brand-border rounded-lg p-4 space-y-2">
-          {[
-            { icon: <CheckCircle className="w-3.5 h-3.5 text-success" />, req: "POST /api/enrollments", key: "idk_4f8a12b", badge: "201 Created", bv: "success" as const, muted: false },
-            { icon: <ArrowRight className="w-3.5 h-3.5 text-brand-hint" />, req: "POST /api/enrollments (reintento)", key: "idk_4f8a12b", badge: "200 OK (cached)", bv: "accent" as const, muted: true },
-          ].map((row, i) => (
-            <div key={i} className={"flex items-center gap-2 py-1.5 border-b border-brand-border last:border-0 " + (row.muted ? "opacity-70" : "")}>
-              {row.icon}
-              <span className="flex-1 text-[11px] font-mono text-brand-muted">{row.req}</span>
-              <code className="text-[10px] bg-surface-2 border border-brand-border px-1.5 py-0.5 rounded font-mono">{row.key}</code>
-              <Badge variant={row.bv}>{row.badge}</Badge>
-            </div>
-          ))}
-          <p className="text-[11px] text-brand-hint pt-1">Mismo resultado devuelto · ningún registro duplicado en la base de datos</p>
-        </div>
-      </div>
     </div>
   );
 }
