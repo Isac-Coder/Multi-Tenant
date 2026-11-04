@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+import { Button } from "../ui/Button";
 
 export const Navbar = () => (
   <nav className="bg-surface-2 border-b border-brand-border px-6 h-[52px] flex items-center justify-between sticky top-0 z-50">

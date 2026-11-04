@@ -1,8 +1,21 @@
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import Link from "next/link";
 
-export default function SignupPage() {
+import Link from "next/link";
+import { Input } from "../../../components/ui/Input";
+import { Button } from "../../../components/ui/Button";
+import { beginSignupAction } from "../../actions/registration";
+
+export default async function SignupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
+  const errorMessage = error === "email"
+    ? "Ya existe una cuenta con ese correo"
+    : error === "invalid"
+      ? "Revisa los datos e ingresa una contraseña de al menos 8 caracteres"
+      : error === "expired"
+        ? "La sesión de registro venció. Inicia el proceso nuevamente"
+        : error === "unavailable"
+          ? "No se pudo iniciar el registro. Inténtalo nuevamente"
+          : null;
+
   return (
     <div className="min-h-screen bg-surface-0 flex items-center justify-center p-6">
       <div className="w-[480px]">
@@ -47,10 +60,12 @@ export default function SignupPage() {
           <h2 className="text-[15px] font-medium text-brand-text mb-1">Información de cuenta</h2>
           <p className="text-[13px] text-brand-muted mb-5">Primero necesitamos tus datos de contacto.</p>
 
-          <form className="space-y-4" action="/register">
+          <form className="space-y-4" action={beginSignupAction}>
             <Input label="Nombre completo" name="name" placeholder="Ej. Juan Pérez" required />
             <Input label="Email" name="email" type="email" placeholder="tu@email.com" required />
-            <Input label="Contraseña" name="password" type="password" placeholder="••••••••" required />
+            <Input label="Contraseña" name="password" type="password" placeholder="••••••••" minLength={8} required />
+
+            {errorMessage && <p className="text-danger text-xs">{errorMessage}</p>}
 
             <div className="flex justify-end pt-2">
               <Button variant="primary" type="submit">

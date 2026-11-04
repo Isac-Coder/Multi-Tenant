@@ -1,13 +1,13 @@
-import { Student } from "@/entities/Student";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Student } from "../../../../entities/Student";
+import { Badge } from "../../../../components/ui/Badge";
+import { Button } from "../../../../components/ui/Button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { getCurrentTenantDataSource } = await import("../../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const student = await AppDataSource.getRepository(Student).findOneBy({ id });
 
   if (!student) return (
@@ -43,7 +43,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <p className="text-[13px] text-brand-muted">{student.email}</p>
             </div>
             <div className="ml-auto">
-              <Badge variant="success">Activo</Badge>
+              <Badge variant={student.status === "active" ? "success" : "neutral"}>
+                {student.status === "active" ? "Activo" : "Inactivo"}
+              </Badge>
             </div>
           </div>
 
@@ -51,6 +53,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             {[
               { label: "ID del estudiante", value: student.id, mono: true },
               { label: "Correo electrónico", value: student.email },
+              { label: "Estado", value: student.status === "active" ? "Activo" : "Inactivo" },
               { label: "Fecha de registro", value: new Date(student.createdAt).toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" }) },
             ].map(row => (
               <div key={row.label}>

@@ -1,8 +1,10 @@
-import { Course } from "@/entities/Course";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+
 import { Plus, BookOpen, Users } from "lucide-react";
 import Link from "next/link";
+import { Button } from "../../../components/ui/Button";
+import { Badge } from "../../../components/ui/Badge";
+import { Course } from "../../../entities/Course";
+import { Enrollment } from "../../../entities/Enrollment";
 
 const CARD_STYLES = [
   { bg: "bg-accent-light", text: "text-accent", bar: "bg-accent-mid" },
@@ -12,10 +14,21 @@ const CARD_STYLES = [
   { bg: "bg-purple-bg",   text: "text-purple",  bar: "bg-purple" },
 ];
 
+export const dynamic = "force-dynamic";
+
 export default async function CoursesPage() {
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { getCurrentTenantDataSource } = await import("../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const courses = await AppDataSource.getRepository(Course).find({ order: { title: "ASC" } });
+  const enrollmentCounts = await AppDataSource.getRepository(Enrollment)
+    .createQueryBuilder("enrollment")
+    .select("enrollment.courseId", "courseId")
+    .addSelect("COUNT(enrollment.id)", "count")
+    .groupBy("enrollment.courseId")
+    .getRawMany();
+  const enrollmentCountByCourse = new Map(
+    enrollmentCounts.map((item: { courseId: string; count: string }) => [item.courseId, Number(item.count)]),
+  );
 
   return (
     <div className="p-6">
@@ -45,6 +58,8 @@ export default async function CoursesPage() {
         <div className="grid grid-cols-3 gap-4">
           {courses.map((course, i) => {
             const style = CARD_STYLES[i % CARD_STYLES.length];
+            const enrollmentCount = enrollmentCountByCourse.get(course.id) ?? 0;
+            const fillPercentage = Math.min((enrollmentCount / course.capacity) * 100, 100);
             return (
               <div key={course.id} className="bg-surface-2 border border-brand-border rounded-card p-5 hover:border-brand-border-strong transition-colors">
                 <div className="flex items-start justify-between mb-3">
@@ -56,10 +71,10 @@ export default async function CoursesPage() {
                 <h3 className="text-[14px] font-medium text-brand-text mb-1 line-clamp-1">{course.title}</h3>
                 <p className="text-[12px] text-brand-muted line-clamp-2 mb-4">{course.description}</p>
                 <div className="flex items-center gap-1.5 text-[11px] text-brand-hint mb-3">
-                  <Users className="w-3 h-3" /> 0 / 60 estudiantes
+                  <Users className="w-3 h-3" /> {enrollmentCount} / {course.capacity} estudiantes
                 </div>
                 <div className="h-1 bg-brand-border rounded-full mb-4">
-                  <div className={"h-full rounded-full " + style.bar} style={{ width: "0%" }} />
+                  <div className={"h-full rounded-full " + style.bar} style={{ width: `${fillPercentage}%` }} />
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Link href={`/courses/${course.id}`} className="flex-1">

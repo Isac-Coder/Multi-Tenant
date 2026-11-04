@@ -1,13 +1,12 @@
 "use client";
 import { useActionState } from "react";
-import { loginAction } from "@/app/actions/auth";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { loginAction } from "../../actions/auth";
+import { Button } from "../../../components/ui/Button";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(loginAction, null);
@@ -15,7 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (state?.success) router.push("/");
+    if (state?.success) router.push(state.mustChangePassword ? "/change-password" : "/");
   }, [state, router]);
 
   return (
@@ -117,7 +116,7 @@ export default function LoginPage() {
 
         <p className="mt-5 text-center text-[13px] text-brand-muted">
           ¿No tienes cuenta?{" "}
-          <Link href="/register" className="text-accent-mid hover:underline font-medium">Crear academia</Link>
+          <Link href="/signup" className="text-accent-mid hover:underline font-medium">Crear cuenta</Link>
         </p>
       </div>
     </div>

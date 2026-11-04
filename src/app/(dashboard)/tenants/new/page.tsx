@@ -1,8 +1,8 @@
 "use client";
 import { useActionState, useEffect } from "react";
-import { createTenantAction } from "@/app/actions/tenants";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { createTenantAction } from "../../../../app/actions/tenants";
+import { Button } from "../../../../components/ui/Button";
+import { Input } from "../../../../components/ui/Input";
 import { ArrowLeft, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

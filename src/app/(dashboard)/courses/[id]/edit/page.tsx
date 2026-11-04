@@ -1,13 +1,14 @@
-import { Course } from "@/entities/Course";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Course } from "../../../../../entities/Course";
+import { Button } from "../../../../../components/ui/Button";
+import { Input } from "../../../../../components/ui/Input";
+import { updateCourseAction } from "../../../../actions/courses";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+export default async function EditCoursePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
+  const [{ id }, { error }] = await Promise.all([params, searchParams]);
+  const { getCurrentTenantDataSource } = await import("../../../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const course = await AppDataSource.getRepository(Course).findOneBy({ id });
 
   if (!course) return (
@@ -31,8 +32,9 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
       <div className="max-w-lg">
         <div className="bg-surface-2 border border-brand-border rounded-card p-6 shadow-sm">
-          <form className="space-y-4">
+          <form action={updateCourseAction.bind(null, id)} className="space-y-4">
             <Input label="Título del curso *" name="title" defaultValue={course.title} required />
+            <Input label="Capacidad máxima *" name="capacity" type="number" min="1" defaultValue={course.capacity} required />
             <div>
               <label className="text-xs font-medium text-brand-muted block mb-1">Descripción *</label>
               <textarea
@@ -45,6 +47,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
                 required
               />
             </div>
+            {error === "invalid" && <p className="text-danger text-xs">Ingresa una capacidad válida.</p>}
             <div className="flex justify-end gap-2.5 pt-2">
               <Link href={`/courses/${id}`}>
                 <Button variant="ghost">Cancelar</Button>

@@ -1,9 +1,9 @@
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Card } from "../../../components/ui/Card";
+import { Badge } from "../../../components/ui/Badge";
+import { Button } from "../../../components/ui/Button";
 import { Plus, CheckCircle, ArrowRight, Info, ClipboardList } from "lucide-react";
 import Link from "next/link";
-import { Enrollment } from "@/entities/Enrollment";
+import { Enrollment } from "../../../entities/Enrollment";
 
 const AVATAR_COLORS = [
   "bg-teal-bg text-teal","bg-purple-bg text-purple",
@@ -14,9 +14,11 @@ function getInitials(name: string) {
   return name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function EnrollmentsPage() {
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { getCurrentTenantDataSource } = await import("../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const enrollments = await AppDataSource.getRepository(Enrollment).find({
     relations: { student: true, course: true },
     order: { enrolledAt: "DESC" },

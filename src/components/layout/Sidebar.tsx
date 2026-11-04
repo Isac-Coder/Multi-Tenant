@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Users, BookOpen, ClipboardList,
   Building2, Settings, LogOut
 } from 'lucide-react';
-import { logoutAction } from '@/app/actions/auth';
+import { logoutAction } from '../../app/actions/auth';
 
 const menuItems = [
   { name: 'Dashboard',      icon: LayoutDashboard, href: '/' },
@@ -16,8 +16,9 @@ const menuItems = [
   { name: 'Tenants',        icon: Building2,        href: '/tenants' },
 ];
 
-export const Sidebar = () => {
+export const Sidebar = ({ userName, userEmail }: { userName: string; userEmail: string }) => {
   const pathname = usePathname();
+  const initials = userName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
   const handleLogout = async () => {
     await logoutAction();
@@ -45,11 +46,11 @@ export const Sidebar = () => {
       <div className="px-3 py-3 border-b border-brand-border flex-shrink-0">
         <div className="flex items-center gap-2.5 px-2 py-2 bg-surface-1 rounded-lg">
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-            IP
+            {initials || "U"}
           </div>
           <div className="min-w-0">
-            <p className="text-[12px] font-medium text-brand-text truncate">Instituto Prestige</p>
-            <p className="text-[10px] text-brand-hint truncate">prestige.edutenant.app</p>
+            <p className="text-[12px] font-medium text-brand-text truncate">{userName}</p>
+            <p className="text-[10px] text-brand-hint truncate">{userEmail}</p>
           </div>
         </div>
       </div>

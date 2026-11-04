@@ -1,8 +1,10 @@
-import { Tenant } from "@/entities/Tenant";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Tenant } from "../../../entities/Tenant";
+import { Button } from "../../../components/ui/Button";
+import { Badge } from "../../../components/ui/Badge";
 import { Plus, AlertTriangle, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { getSessionIdentity } from "@/lib/auth-session";
+import { notFound } from "next/navigation";
 
 const TENANT_COLORS = ["bg-accent","bg-teal","bg-purple","bg-danger","bg-warning"];
 
@@ -10,10 +12,17 @@ function getInitials(name: string) {
   return name.split(" ").slice(0,2).map(n => n[0]).join("").toUpperCase();
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function TenantsPage() {
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
+  const session = await getSessionIdentity();
+  if (!session) notFound();
+
+  const { AppDataSource, initializeDatabase } = await import("../../../database/data-source");
   await initializeDatabase();
-  const tenants = await AppDataSource.getRepository(Tenant).find({ order: { name: "ASC" } });
+  const tenants = session.role === "platform_admin"
+    ? await AppDataSource.getRepository(Tenant).find({ order: { name: "ASC" } })
+    : await AppDataSource.getRepository(Tenant).findBy({ id: session.tenantId });
 
   return (
     <div className="p-6">
@@ -86,7 +95,9 @@ export default async function TenantsPage() {
                   <td className="px-4 py-3"><Badge variant="purple">Pro</Badge></td>
                   <td className="px-4 py-3"><Badge variant="success">Activo</Badge></td>
                   <td className="px-4 py-3">
-                    <Button size="sm" variant="ghost">Ver</Button>
+                    <Link href={`/tenants/${t.id}`}>
+                      <Button size="sm" variant="ghost">Ver</Button>
+                    </Link>
                   </td>
                 </tr>
               ))}

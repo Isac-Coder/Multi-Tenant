@@ -1,13 +1,15 @@
-import { Student } from "@/entities/Student";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Student } from "../../../../../entities/Student";
+import { Button } from "../../../../../components/ui/Button";
+import { Input } from "../../../../../components/ui/Input";
+import { Select } from "../../../../../components/ui/Select";
+import { updateStudentAction } from "../../../../actions/students";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { getCurrentTenantDataSource } = await import("../../../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const student = await AppDataSource.getRepository(Student).findOneBy({ id });
 
   if (!student) return (
@@ -31,9 +33,14 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
 
       <div className="max-w-lg">
         <div className="bg-surface-2 border border-brand-border rounded-card p-6 shadow-sm">
-          <form className="space-y-4">
+          <form action={updateStudentAction.bind(null, id)} className="space-y-4">
             <Input label="Nombre completo *" name="name" defaultValue={student.name} required />
             <Input label="Correo electrónico *" name="email" type="email" defaultValue={student.email} required />
+            <Input label="Teléfono" name="phone" defaultValue={student.phone ?? ""} />
+            <Select label="Estado" name="status" defaultValue={student.status}>
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+            </Select>
             <div className="flex justify-end gap-2.5 pt-2">
               <Link href={`/students/${id}`}>
                 <Button variant="ghost">Cancelar</Button>

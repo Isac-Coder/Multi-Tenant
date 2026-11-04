@@ -1,21 +1,27 @@
-import { Student } from "@/entities/Student";
-import { Course } from "@/entities/Course";
-import { Enrollment } from "@/entities/Enrollment";
-import { MetricCard } from "@/components/ui/MetricCard";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Student } from "../../entities/Student";
+import { Course } from "../../entities/Course";
+import { Enrollment } from "../../entities/Enrollment";
+import { Tenant } from "../../entities/Tenant";
+import { MetricCard } from "../../components/ui/MetricCard";
+import { Badge } from "../../components/ui/Badge";
+import { Button } from "../../components/ui/Button";
 import { Users, BookOpen, ClipboardList, TrendingUp, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
 
 export default async function Home() {
   await headers(); // Force dynamic rendering
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { AppDataSource } = await import("../../database/data-source");
+  const { getCurrentTenantDataSource } = await import("../../database/tenant-data-source");
+  const { dataSource, tenantId } = await getCurrentTenantDataSource();
+  const tenant = await AppDataSource.getRepository(Tenant).findOneBy({ id: tenantId });
 
-  const studentRepo = AppDataSource.getRepository(Student);
-  const courseRepo = AppDataSource.getRepository(Course);
-  const enrollmentRepo = AppDataSource.getRepository(Enrollment);
+  const studentRepo = dataSource.getRepository(Student);
+  const courseRepo = dataSource.getRepository(Course);
+  const enrollmentRepo = dataSource.getRepository(Enrollment);
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
   const [
     totalStudents,
@@ -24,7 +30,9 @@ export default async function Home() {
     recentEnrollments,
     activeStudentsThisMonth,
     newCoursesThisMonth,
-    newEnrollmentsThisWeek
+    newEnrollmentsThisWeek,
+    newEnrollmentsThisMonth,
+    newEnrollmentsLastMonth
   ] = await Promise.all([
     studentRepo.count(),
     courseRepo.count(),
@@ -43,13 +51,27 @@ export default async function Home() {
     enrollmentRepo.createQueryBuilder("enrollment")
       .where("enrollment.enrolledAt >= :date", { date: new Date(new Date().setDate(new Date().getDate() - 7)) })
       .getCount(),
+    enrollmentRepo.createQueryBuilder("enrollment")
+      .where("enrollment.enrolledAt >= :start", { start: currentMonthStart })
+      .getCount(),
+    enrollmentRepo.createQueryBuilder("enrollment")
+      .where("enrollment.enrolledAt >= :start", { start: previousMonthStart })
+      .andWhere("enrollment.enrolledAt < :end", { end: currentMonthStart })
+      .getCount(),
   ]);
+
+  const enrollmentMonthDelta = newEnrollmentsThisMonth - newEnrollmentsLastMonth;
+  const enrollmentMonthComparison = enrollmentMonthDelta > 0
+    ? `↑ ${enrollmentMonthDelta} vs mes anterior`
+    : enrollmentMonthDelta < 0
+      ? `↓ ${Math.abs(enrollmentMonthDelta)} vs mes anterior`
+      : "Sin cambios vs mes anterior";
 
   const metrics = [
     { label: "Estudiantes activos", value: totalStudents, sub: `↑ ${activeStudentsThisMonth} este mes`, subColor: "text-success", icon: Users, iconBg: "bg-accent-light", iconColor: "text-accent" },
     { label: "Cursos activos",      value: totalCourses,  sub: `↑ ${newCoursesThisMonth} nuevos`,    subColor: "text-success", icon: BookOpen, iconBg: "bg-teal-bg", iconColor: "text-teal" },
     { label: "Inscripciones",       value: totalEnrollments, sub: `↑ ${newEnrollmentsThisWeek} esta semana`, subColor: "text-accent", icon: ClipboardList, iconBg: "bg-purple-bg", iconColor: "text-purple" },
-    { label: "Tasa de finalización", value: "74%", sub: "↓ 3% vs mes anterior", subColor: "text-warning", icon: TrendingUp, iconBg: "bg-warning-bg", iconColor: "text-warning" },
+    { label: "Inscripciones del mes", value: newEnrollmentsThisMonth, sub: enrollmentMonthComparison, subColor: enrollmentMonthDelta < 0 ? "text-warning" : "text-success", icon: TrendingUp, iconBg: "bg-warning-bg", iconColor: "text-warning" },
   ];
 
   const avatarColors = ["bg-teal-bg text-teal", "bg-purple-bg text-purple", "bg-warning-bg text-warning", "bg-danger-bg text-danger", "bg-accent-light text-accent"];
@@ -60,7 +82,7 @@ export default async function Home() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[18px] font-medium text-brand-text">Dashboard</h1>
-          <p className="text-[13px] text-brand-muted mt-0.5">Resumen de Instituto Prestige</p>
+          <p className="text-[13px] text-brand-muted mt-0.5">Resumen de {tenant?.name ?? "tu academia"}</p>
         </div>
         <Link href="/students/new">
           <Button variant="primary">

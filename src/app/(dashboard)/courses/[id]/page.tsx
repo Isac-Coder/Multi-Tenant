@@ -1,13 +1,14 @@
-import { Course } from "@/entities/Course";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Course } from "../../../../entities/Course";
+import { Enrollment } from "../../../../entities/Enrollment";
+import { Badge } from "../../../../components/ui/Badge";
+import { Button } from "../../../../components/ui/Button";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { getCurrentTenantDataSource } = await import("../../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const course = await AppDataSource.getRepository(Course).findOneBy({ id });
 
   if (!course) return (
@@ -16,6 +17,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <Link href="/courses"><Button variant="ghost" className="mt-3">← Volver</Button></Link>
     </div>
   );
+
+  const enrollmentCount = await AppDataSource.getRepository(Enrollment).countBy({ courseId: id });
+  const fillPercentage = Math.min((enrollmentCount / course.capacity) * 100, 100);
 
   return (
     <div className="p-6">
@@ -51,9 +55,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
             <div>
               <p className="text-[11px] font-medium text-brand-muted mb-1">Capacidad</p>
-              <p className="text-[13px] text-brand-text">0 / 60 estudiantes</p>
+              <p className="text-[13px] text-brand-text">{enrollmentCount} / {course.capacity} estudiantes</p>
               <div className="h-1 bg-brand-border rounded-full mt-1.5">
-                <div className="h-full bg-accent-mid rounded-full" style={{ width: "0%" }} />
+                <div className="h-full bg-accent-mid rounded-full" style={{ width: `${fillPercentage}%` }} />
               </div>
             </div>
           </div>

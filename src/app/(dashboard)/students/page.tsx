@@ -1,6 +1,6 @@
-import { Student } from "@/entities/Student";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Student } from "../../../entities/Student";
+import { Button } from "../../../components/ui/Button";
+import { Badge } from "../../../components/ui/Badge";
 import { Plus, Search, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
@@ -13,9 +13,11 @@ function getInitials(name: string) {
   return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function StudentsPage() {
-  const { AppDataSource, initializeDatabase } = await import("@/database/data-source");
-  await initializeDatabase();
+  const { getCurrentTenantDataSource } = await import("../../../database/tenant-data-source");
+  const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
   const students = await AppDataSource.getRepository(Student).find({ order: { createdAt: "DESC" } });
 
   return (
@@ -93,14 +95,18 @@ export default async function StudentsPage() {
                     <td className="px-4 py-3 text-[12px] text-brand-muted">
                       {new Date(student.createdAt).toLocaleDateString("es-CO")}
                     </td>
-                    <td className="px-4 py-3"><Badge variant="success">Activo</Badge></td>
+                    <td className="px-4 py-3">
+                      <Badge variant={student.status === "active" ? "success" : "neutral"}>
+                        {student.status === "active" ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         <Link href={`/students/${student.id}`}>
                           <Button size="sm" variant="ghost">Ver</Button>
                         </Link>
                         <Link href={`/students/${student.id}/edit`}>
-                          <Button size="sm" variant="secondary">Editar</Button>
+                          <Button size="sm" variant="ghost">Editar</Button>
                         </Link>
                       </div>
                     </td>

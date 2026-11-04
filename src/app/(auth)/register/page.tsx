@@ -1,9 +1,14 @@
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import Link from "next/link";
 import { Key, Building2, MapPin } from "lucide-react";
+import { Button } from "../../../components/ui/Button";
+import { redirect } from "next/navigation";
+import { getPendingSignup } from "@/lib/auth-session";
 
-export default function RegisterPage() {
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ name?: string; email?: string }> }) {
+  const { name, email } = await searchParams;
+  const pendingSignup = await getPendingSignup();
+  if (!pendingSignup || !name || !email || name !== pendingSignup.name || email !== pendingSignup.email) redirect("/signup");
+
   return (
     <div className="min-h-screen bg-surface-0 flex items-center justify-center p-6">
       <div className="w-[480px]">
@@ -50,7 +55,9 @@ export default function RegisterPage() {
           <h2 className="text-[15px] font-medium text-brand-text mb-1">Cuéntanos sobre tu academia</h2>
           <p className="text-[13px] text-brand-muted mb-5">Esto creará tu tenant con datos completamente aislados.</p>
 
-          <form className="space-y-4">
+          <form className="space-y-4" action="/register/confirm" method="get">
+            <input type="hidden" name="name" value={name} />
+            <input type="hidden" name="email" value={email} />
             <div>
               <label className="text-xs font-medium text-brand-muted block mb-1">
                 <Building2 className="w-3 h-3 inline mr-1" />
@@ -59,6 +66,7 @@ export default function RegisterPage() {
               <input
                 name="academyName"
                 placeholder="Ej. Instituto de Idiomas Prestige"
+                required
                 className="w-full px-2.5 py-1.5 text-sm bg-surface-2 border border-brand-border-strong rounded-lg
                            text-brand-text placeholder:text-brand-hint
                            focus:outline-none focus:border-accent-mid focus:ring-2 focus:ring-accent-light transition-colors"
@@ -71,6 +79,7 @@ export default function RegisterPage() {
                 <input
                   name="slug"
                   placeholder="mi-academia"
+                  required
                   className="w-full px-2.5 py-1.5 text-sm bg-surface-2 border border-brand-border-strong rounded-lg
                              text-brand-text placeholder:text-brand-hint
                              focus:outline-none focus:border-accent-mid focus:ring-2 focus:ring-accent-light transition-colors"

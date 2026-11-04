@@ -1,8 +1,8 @@
 "use client";
 import { useActionState, useEffect } from "react";
-import { createCourseAction } from "@/app/actions/courses";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { createCourseAction } from "../../../../app/actions/courses";
+import { Button } from "../../../../components/ui/Button";
+import { Input } from "../../../../components/ui/Input";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,7 +48,7 @@ export default function NewCoursePage() {
               />
             </div>
 
-            <Input label="Capacidad máxima" name="capacity" type="number" placeholder="Ej. 60" />
+            <Input label="Capacidad máxima" name="capacity" type="number" min="1" defaultValue="60" required />
 
             {state?.error && (
               <p className="text-danger text-xs">{state.error}</p>
