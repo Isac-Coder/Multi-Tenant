@@ -5,9 +5,9 @@ import { withProxy } from "@/lib/proxy";
 export async function GET(req: NextRequest) {
   return withProxy(req, async (req, tenantId) => {
     try {
-      const { AppDataSource } = await import("@/database/data-source");
-      if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-      const courseRepository = AppDataSource.getRepository(Course);
+      const { getTenantDataSource } = await import("@/database/tenant-data-source");
+      const dataSource = await getTenantDataSource(tenantId);
+      const courseRepository = dataSource.getRepository(Course);
       
       const courses = await courseRepository.find({ where: { tenantId } });
       return NextResponse.json(courses);
@@ -23,17 +23,20 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       
       // Validación básica
-      if (!body.title || !body.description) {
+      const capacity = Number(body.capacity ?? 60);
+      if (!body.title || !body.description || !Number.isInteger(capacity) || capacity < 1) {
         return NextResponse.json({ error: "Missing fields" }, { status: 400 });
       }
 
-      const { AppDataSource } = await import("@/database/data-source");
-      if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-      const courseRepository = AppDataSource.getRepository(Course);
+      const { getTenantDataSource } = await import("@/database/tenant-data-source");
+      const dataSource = await getTenantDataSource(tenantId);
+      const courseRepository = dataSource.getRepository(Course);
       
       const newCourse = courseRepository.create({
-        ...body,
-        tenantId
+        title: String(body.title).trim(),
+        description: String(body.description).trim(),
+        capacity,
+        tenantId,
       });
       
       await courseRepository.save(newCourse);

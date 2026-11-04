@@ -19,18 +19,21 @@ export async function proxy(request: NextRequest) {
   }
 
   const token = request.cookies.get('auth-token')?.value;
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register');
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/signup');
+  const isPasswordChangeRoute = pathname === '/change-password';
 
   // 2. Validate token if present
   let isAuthenticated = false;
+  let mustChangePassword = false;
   if (token) {
     try {
       // Step 1 of verification: Signature & Expiration
-      await jwtVerify(token, SECRET);
+      const { payload } = await jwtVerify(token, SECRET);
       
       // Step 2 of verification: Could add further checks here 
       // (e.g., check user status in a database/cache)
       isAuthenticated = true;
+      mustChangePassword = payload.must_change_password === true;
     } catch (e) {
       isAuthenticated = false;
     }
@@ -38,6 +41,15 @@ export async function proxy(request: NextRequest) {
 
   // 3. Routing Logic
   
+  // Temporary-password users may only access the password change screen.
+  if (isAuthenticated && mustChangePassword && !isPasswordChangeRoute) {
+    return NextResponse.redirect(new URL('/change-password', request.url));
+  }
+
+  if (isAuthenticated && isPasswordChangeRoute && !mustChangePassword) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   // If user is authenticated and tries to access auth routes, redirect to dashboard
   if (isAuthenticated && isAuthRoute) {
     return NextResponse.redirect(new URL('/', request.url));

@@ -4,10 +4,10 @@ import { withProxy } from "@/lib/proxy";
 export async function GET(req: NextRequest) {
   return withProxy(req, async (req, tenantId) => {
     try {
-      const { AppDataSource } = await import("@/database/data-source");
+      const { getTenantDataSource } = await import("@/database/tenant-data-source");
       const { Student } = await import("@/entities/Student");
-      if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-      const studentRepository = AppDataSource.getRepository(Student);
+      const dataSource = await getTenantDataSource(tenantId);
+      const studentRepository = dataSource.getRepository(Student);
       const students = await studentRepository.find({ where: { tenantId } });
       return NextResponse.json(students);
     } catch (error: any) {
@@ -24,10 +24,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Missing fields" }, { status: 400 });
       }
 
-      const { AppDataSource } = await import("@/database/data-source");
+      const { getTenantDataSource } = await import("@/database/tenant-data-source");
       const { Student } = await import("@/entities/Student");
-      if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-      const studentRepository = AppDataSource.getRepository(Student);
+      const dataSource = await getTenantDataSource(tenantId);
+      const studentRepository = dataSource.getRepository(Student);
       
       const student = studentRepository.create({
         name: body.name,
