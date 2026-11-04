@@ -1,7 +1,8 @@
 "use server";
 
 import { AppDataSource, initializeDatabase } from "@/database/data-source";
-import { Tenant } from "@/entities/Tenant";
+import { createTenantWithSchema } from "@/database/tenant-provisioning";
+import { getSessionIdentity } from "@/lib/auth-session";
 import { revalidatePath } from "next/cache";
 
 export async function createTenantAction(prevState: any, formData: FormData) {
@@ -12,15 +13,29 @@ export async function createTenantAction(prevState: any, formData: FormData) {
     return { error: "Nombre y slug son requeridos" };
   }
 
+  const session = await getSessionIdentity();
+  if (session?.role !== "platform_admin") {
+    return { error: "No tienes permiso para crear tenants" };
+  }
+
   await initializeDatabase();
-  const tenantRepo = AppDataSource.getRepository(Tenant);
+  const queryRunner = AppDataSource.createQueryRunner();
+  try {
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    await createTenantWithSchema(queryRunner, {
+      name: name.trim(),
+      slug: slug.trim().toLowerCase(),
+    });
+    await queryRunner.commitTransaction();
+  } catch (error) {
+    if (queryRunner.isTransactionActive) await queryRunner.rollbackTransaction();
+    console.error("Error creating tenant schema", error);
+    return { error: "No se pudo crear el tenant. Verifica que el nombre y el slug no estén en uso." };
+  } finally {
+    await queryRunner.release();
+  }
 
-  const tenant = tenantRepo.create({
-    name,
-    slug,
-  });
-
-  await tenantRepo.save(tenant);
   revalidatePath("/tenants");
   
   return { success: true };

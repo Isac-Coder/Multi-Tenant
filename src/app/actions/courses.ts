@@ -1,36 +1,55 @@
 "use server";
 
-import { AppDataSource, initializeDatabase } from "@/database/data-source";
+import { getCurrentTenantDataSource } from "@/database/tenant-data-source";
 import { Course } from "@/entities/Course";
-import { Tenant } from "@/entities/Tenant";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function createCourseAction(prevState: any, formData: FormData) {
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
-  const capacity = parseInt(formData.get("capacity") as string) || 0;
+  const capacityInput = String(formData.get("capacity") ?? "60");
+  const capacity = Number.parseInt(capacityInput, 10);
 
-  if (!title || !description) {
-    return { error: "Título y descripción son requeridos" };
+  if (!title || !description || !Number.isInteger(capacity) || capacity < 1) {
+    return { error: "Título, descripción y una capacidad válida son requeridos" };
   }
 
-  await initializeDatabase();
-  const courseRepo = AppDataSource.getRepository(Course);
-  const tenantRepo = AppDataSource.getRepository(Tenant);
-  
-  const tenant = await tenantRepo.findOneBy({});
-  if (!tenant) {
-    return { error: "No hay tenants registrados. Crea uno primero." };
-  }
+  const { dataSource, tenantId } = await getCurrentTenantDataSource();
+  const courseRepo = dataSource.getRepository(Course);
 
-  const course = courseRepo.create({
+  await courseRepo.insert({
     title,
     description,
-    tenantId: tenant.id,
+    capacity,
+    tenantId,
   });
-
-  await courseRepo.save(course);
   revalidatePath("/courses");
   
   return { success: true };
+}
+
+export async function updateCourseAction(id: string, formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const capacity = Number.parseInt(String(formData.get("capacity") ?? ""), 10);
+
+  if (!title || !description || !Number.isInteger(capacity) || capacity < 1) {
+    redirect(`/courses/${id}/edit?error=invalid`);
+  }
+
+  const { dataSource } = await getCurrentTenantDataSource();
+  const courseRepo = dataSource.getRepository(Course);
+  const course = await courseRepo.findOneBy({ id });
+  if (!course) {
+    redirect("/courses");
+  }
+
+  course.title = title;
+  course.description = description;
+  course.capacity = capacity;
+  await courseRepo.save(course);
+  revalidatePath("/courses");
+  revalidatePath(`/courses/${id}`);
+  redirect(`/courses/${id}`);
 }

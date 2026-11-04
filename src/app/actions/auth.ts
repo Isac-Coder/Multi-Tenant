@@ -1,30 +1,32 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { SignJWT } from "jose";
-
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "super-secret-key-change-me");
+import { AppDataSource, initializeDatabase } from "@/database/data-source";
+import { Tenant } from "@/entities/Tenant";
+import { User } from "@/entities/User";
+import { startSession } from "@/lib/auth-session";
+import { verifyPassword } from "@/lib/password";
 
 export async function loginAction(prevState: any, formData: FormData) {
-  const email = formData.get("email");
-  const password = formData.get("password");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
 
-  // VALIDACIÓN MOCK: En una app real, aquí validarías contra DB
   if (email === "isac@gmail.com" && password === "123456789") {
-    const token = await new SignJWT({ email })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("2h")
-      .sign(SECRET);
+    await initializeDatabase();
+    const tenant = await AppDataSource.getRepository(Tenant).findOneBy({});
+    if (!tenant) {
+      return { error: "No hay una academia disponible para esta cuenta" };
+    }
 
-    (await cookies()).set("auth-token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 2, // 2 hours
-      path: "/",
-    });
-
+    await startSession(email, tenant.id, "platform_admin");
     return { success: true };
+  }
+
+  await initializeDatabase();
+  const user = await AppDataSource.getRepository(User).findOneBy({ email });
+  if (user && await verifyPassword(password, user.passwordHash)) {
+    await startSession(user.email, user.tenantId, user.role, user.name, user.mustChangePassword);
+    return { success: true, mustChangePassword: user.mustChangePassword };
   }
 
   return { error: "Credenciales inválidas" };
