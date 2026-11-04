@@ -7,14 +7,15 @@ Este es un proyecto de software como servicio (SaaS) diseñado para la gestión 
 - **Frontend/Backend:** [Next.js 15+](https://nextjs.org/) (Fullstack)
 - **Base de Datos:** [Supabase](https://supabase.com/) (PostgreSQL)
 - **ORM:** [TypeORM](https://typeorm.io/)
-- **Seguridad:** JWT, RLS (Row Level Security)
+- **Seguridad:** JWT y aislamiento de datos por schema de PostgreSQL
 
 ## 🏗️ Arquitectura de Aislamiento
 
-El proyecto utiliza una estrategia de **Shared Schema** (Esquema Compartido). Todos los datos residen en la misma base de datos, pero están aislados lógicamente mediante:
+El proyecto utiliza **un schema de PostgreSQL por tenant**. El registro central `public.tenants` almacena el nombre del schema (`tenant_<uuid>`), mientras que `students`, `courses` y `enrollments` viven dentro de ese schema. Las cuentas de acceso permanecen en `public.users`.
 
-1.  **Seguridad a Nivel de Fila (RLS):** Implementada en PostgreSQL para asegurar que los usuarios solo puedan acceder a datos de su `tenantId`.
-2.  **Proxy de API:** Una capa funcional que valida el JWT de la sesión y extrae el `tenantId` de forma segura, inyectándolo en las operaciones de base de datos.
+El tenant se obtiene de la sesión JWT firmada. El servidor resuelve su schema desde el registro central y crea un datasource limitado a ese schema; ninguna ruta acepta el nombre del schema desde el cliente. Las APIs además validan el JWT y restringen las operaciones al tenant de la sesión.
+
+La separación de schemas se aplica en la capa de aplicación. El usuario configurado en `DATABASE_URL` es una credencial de servidor con acceso a la base; no debe exponerse al cliente. Consulta [context/RLS.md](context/RLS.md) para conocer esta frontera de seguridad y las consideraciones de RLS.
 
 ## 🛠️ Requisitos de Robustez (En progreso)
 

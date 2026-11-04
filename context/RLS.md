@@ -1,54 +1,28 @@
-# Configuración de Row Level Security (RLS) - SaaS Multitenant
+# Aislamiento por Schema y consideraciones de RLS
 
-Este documento detalla la implementación de la Seguridad a Nivel de Fila (RLS) aplicada en la base de datos de Supabase para garantizar el aislamiento estricto de datos entre los diferentes tenants (academias/institutos).
+## Arquitectura actual
 
-## 🎯 Objetivo
-Asegurar el aislamiento de datos estricto mediante RLS en un modelo de **Shared Schema**. Ningún usuario debe poder acceder a datos que no pertenezcan al `tenantId` vinculado a su sesión.
+La aplicación usa un schema PostgreSQL por tenant en la misma base de Supabase:
 
-## 🛠️ Estrategia de Implementación
+- `public.tenants` mantiene el registro central y el nombre validado del schema (`tenant_<uuid sin guiones>`).
+- `public.users` mantiene las cuentas de autenticación y su `tenantId`.
+- `students`, `courses` y `enrollments` se crean dentro del schema de cada tenant.
 
-### 1. Función de Identidad
-Se utiliza el `tenant_id` almacenado en los `app_metadata` del JWT del usuario autenticado.
+Al iniciar sesión, el JWT firmado incluye `tenant_id`. El servidor valida la firma y resuelve el nombre del schema desde `public.tenants`; el cliente no envía ni controla ese nombre. `getTenantDataSource` crea un datasource cuyo schema queda fijado al del tenant. Las páginas, acciones y APIs de negocio deben usar ese datasource y no consultar las tablas compartidas de `public`.
 
-```sql
-CREATE OR REPLACE FUNCTION auth.get_my_tenant_id() 
-RETURNS uuid AS $$
-  SELECT (auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid;
-$$ LANGUAGE sql STABLE;
-```
+La migración `MigrateTenantDataToSchemas1793812000000` crea los schemas, copia las filas existentes por `tenantId`, comprueba que no haya filas huérfanas y valida los conteos antes de retirar las tablas compartidas.
 
-### 2. Política General de Aislamiento
-Para las tablas `students`, `courses` y `enrollments`, se aplicará la siguiente política (ejemplo para `students`):
+## Frontera de seguridad
 
-```sql
-ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+El aislamiento entre usuarios de la aplicación se aplica en el servidor al resolver el schema exclusivamente desde la sesión autenticada. Las rutas administrativas de tenants requieren el rol `platform_admin`; un tenant normal solo puede consultar su propio detalle.
 
--- Política de lectura: Solo usuarios del mismo tenant
-CREATE POLICY "Aislamiento de lectura" ON public.students
-FOR SELECT USING (
-  "tenantId" = auth.get_my_tenant_id()
-);
+Esto **no equivale a RLS**: una credencial de base de datos con permisos sobre todos los schemas puede leerlos directamente. `DATABASE_URL` debe permanecer exclusivamente en el servidor y no debe exponerse al cliente. Si se requiere aislamiento a nivel de conexión SQL, hay que desplegar roles/políticas de base de datos que no sean propietarios o superusuarios y verificar que no puedan cambiar libremente el `search_path`.
 
--- Política de escritura: Solo usuarios del mismo tenant
-CREATE POLICY "Aislamiento de escritura" ON public.students
-FOR ALL USING (
-  "tenantId" = auth.get_my_tenant_id()
-) WITH CHECK (
-  "tenantId" = auth.get_my_tenant_id()
-);
-```
+## Verificación
 
-## ⚠️ Consideraciones Críticas para el Proyecto
-
-### Backend y Bypass de RLS
-El usuario `postgres` (usado habitualmente en `DATABASE_URL`) es superusuario y **salta todas las RLS**. 
-Para demostrar la efectividad de las RLS en la sustentación:
-1. Debes crear un usuario de base de datos con menos privilegios en Supabase.
-2. Configurar tu backend para usar este nuevo usuario en lugar de `postgres`.
-3. Esto garantizará que las políticas RLS definidas arriba sean ejecutadas.
-
-### Idempotencia y RLS
-Para el requisito de idempotencia (4.4), debes asegurar que la tabla donde guardas las claves de idempotencia también tenga políticas RLS para evitar que un tenant vea las operaciones de otro.
+- La migración compara las filas migradas con las cantidades originales por tenant.
+- Las páginas y APIs de negocio seleccionan el datasource usando el `tenant_id` firmado.
+- Las pruebas de integración deben crear datos con una sesión y comprobar que otra sesión no los obtiene.
 
 ---
-**Última Actualización:** 2026-10-30
+**Última Actualización:** 2026-11-04

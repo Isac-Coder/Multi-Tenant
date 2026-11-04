@@ -11,9 +11,11 @@ Este proyecto consiste en el desarrollo de una plataforma SaaS (Software as a Se
 - **Estilos**: Tailwind CSS.
 
 ## 3. Arquitectura Multitenant
-- **Estrategia de Aislamiento**: Shared Schema (Esquema Compartido).
-- **Mecanismo**: Cada tabla de datos (estudiantes, cursos, inscripciones) posee una columna `tenantId` que vincula el registro a una academia específica.
-- **Identificación**: El tenant es identificado a través de un `slug` único en la base de datos, lo que permite futuras implementaciones de subdominios o rutas dinámicas (ej. `/academia-abc/dashboard`).
+- **Estrategia de aislamiento**: un schema PostgreSQL independiente por tenant, nombrado `tenant_<uuid sin guiones>`.
+- **Registro central**: `public.tenants` guarda el `schemaName`; `public.users` conserva las cuentas y su `tenantId`.
+- **Datos de negocio**: `students`, `courses` y `enrollments` se crean dentro del schema del tenant. Sus filas conservan `tenantId` como vínculo y clave foránea al registro central.
+- **Resolución**: el servidor valida la sesión JWT, obtiene el tenantId firmado y resuelve el schema desde `public.tenants`. El cliente no puede seleccionar un schema.
+- **Identificación externa**: cada tenant mantiene un `slug` único para futuras implementaciones de subdominios o rutas dinámicas (ej. `/academia-abc/dashboard`).
 
 ## 4. Modelo de Datos
 El sistema se basa en cuatro entidades principales:
