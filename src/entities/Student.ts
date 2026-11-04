@@ -1,5 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
-import type { Tenant } from "./Tenant";
+import type { Relation } from "typeorm";
+import { Tenant as TenantTarget } from "./Tenant.ts";
+import type { Tenant } from "./Tenant.ts";
+
+export type StudentStatus = "active" | "inactive";
 
 @Entity("students")
 export class Student {
@@ -15,12 +19,15 @@ export class Student {
   @Column({ type: "varchar", nullable: true })
   phone!: string;
 
+  @Column({ type: "varchar", default: "active" })
+  status!: StudentStatus;
+
   @Column({ type: "uuid" })
   tenantId!: string;
 
-  @ManyToOne("Tenant", "students")
+  @ManyToOne(() => TenantTarget, (tenant) => tenant.students)
   @JoinColumn({ name: "tenantId" })
-  tenant!: Tenant;
+  tenant!: Relation<Tenant>;
 
   @CreateDateColumn()
   createdAt!: Date;

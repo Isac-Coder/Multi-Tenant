@@ -1,7 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
-import { Student } from "./Student";
-import { Course } from "./Course";
-import { Tenant } from "./Tenant";
+import type { Relation } from "typeorm";
+import { Student as StudentTarget } from "./Student.ts";
+import { Course as CourseTarget } from "./Course.ts";
+import { Tenant as TenantTarget } from "./Tenant.ts";
+import type { Student } from "./Student.ts";
+import type { Course } from "./Course.ts";
+import type { Tenant } from "./Tenant.ts";
 
 @Entity("enrollments")
 export class Enrollment {
@@ -17,17 +21,17 @@ export class Enrollment {
   @Column({ type: "uuid" })
   tenantId!: string;
 
-  @ManyToOne("Student")
+  @ManyToOne(() => StudentTarget)
   @JoinColumn({ name: "studentId" })
-  student!: Student;
+  student!: Relation<Student>;
 
-  @ManyToOne("Course", "enrollments")
+  @ManyToOne(() => CourseTarget, (course) => course.enrollments)
   @JoinColumn({ name: "courseId" })
-  course!: Course;
+  course!: Relation<Course>;
 
-  @ManyToOne("Tenant")
+  @ManyToOne(() => TenantTarget)
   @JoinColumn({ name: "tenantId" })
-  tenant!: Tenant;
+  tenant!: Relation<Tenant>;
 
   @CreateDateColumn()
   enrolledAt!: Date;

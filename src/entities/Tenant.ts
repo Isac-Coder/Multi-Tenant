@@ -1,8 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm";
-import type { Student } from "./Student";
-import type { Course } from "./Course";
+import type { Relation } from "typeorm";
+import { Student as StudentTarget } from "./Student.ts";
+import { Course as CourseTarget } from "./Course.ts";
+import type { Student } from "./Student.ts";
+import type { Course } from "./Course.ts";
 
-@Entity("tenants")
+@Entity({ name: "tenants", schema: "public" })
 export class Tenant {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -13,12 +16,18 @@ export class Tenant {
   @Column({ type: "varchar", unique: true })
   slug!: string;
 
+  @Column({ type: "varchar", unique: true })
+  schemaName!: string;
+
+  @Column({ type: "varchar", nullable: true })
+  city!: string | null;
+
   @CreateDateColumn()
   createdAt!: Date;
 
-  @OneToMany("Student", "tenant")
-  students!: Student[];
+  @OneToMany(() => StudentTarget, (student) => student.tenant)
+  students!: Relation<Student[]>;
 
-  @OneToMany("Course", "tenant")
-  courses!: Course[];
+  @OneToMany(() => CourseTarget, (course) => course.tenant)
+  courses!: Relation<Course[]>;
 }

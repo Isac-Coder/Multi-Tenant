@@ -1,6 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm";
-import type { Tenant } from "./Tenant";
-import type { Enrollment } from "./Enrollment";
+import type { Relation } from "typeorm";
+import { Tenant as TenantTarget } from "./Tenant.ts";
+import { Enrollment as EnrollmentTarget } from "./Enrollment.ts";
+import type { Tenant } from "./Tenant.ts";
+import type { Enrollment } from "./Enrollment.ts";
 
 @Entity("courses")
 export class Course {
@@ -13,15 +16,18 @@ export class Course {
   @Column({ type: "text" })
   description!: string;
 
+  @Column({ type: "integer", default: 60 })
+  capacity!: number;
+
   @Column({ type: "uuid" })
   tenantId!: string;
 
-  @ManyToOne("Tenant", "courses")
+  @ManyToOne(() => TenantTarget, (tenant) => tenant.courses)
   @JoinColumn({ name: "tenantId" })
-  tenant!: Tenant;
+  tenant!: Relation<Tenant>;
 
-  @OneToMany("Enrollment", "course")
-  enrollments!: Enrollment[];
+  @OneToMany(() => EnrollmentTarget, (enrollment) => enrollment.course)
+  enrollments!: Relation<Enrollment[]>;
 
   @CreateDateColumn()
   createdAt!: Date;

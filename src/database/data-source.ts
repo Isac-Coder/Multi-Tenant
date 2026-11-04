@@ -1,17 +1,17 @@
 import "reflect-metadata";
+import "dotenv/config";
 import { DataSource } from "typeorm";
 // TypeORM 0.3.x+ requires the driver to be imported directly or available in node_modules.
 // In some ESM environments, explicitly requiring the driver can help.
 import * as pg from "pg";
 (global as any).pg = pg;
 
-import { Tenant } from "../entities/Tenant";
-import { Student } from "../entities/Student";
-import { Course } from "../entities/Course";
-import { Enrollment } from "../entities/Enrollment";
+import { Tenant } from "../entities/Tenant.ts";
+import { Student } from "../entities/Student.ts";
+import { Course } from "../entities/Course.ts";
+import { Enrollment } from "../entities/Enrollment.ts";
+import { User } from "../entities/User.ts";
 
-
-// dotenv.config();
 
 let AppDataSource: DataSource;
 let isInitializing = false;
@@ -22,7 +22,8 @@ if (typeof window === 'undefined') {
   AppDataSource = new DataSource({
     type: "postgres",
     url: process.env.DATABASE_URL,
-    entities: [Tenant, Student, Course, Enrollment],
+    schema: "public",
+    entities: [Tenant, Student, Course, Enrollment, User],
     migrations: ["src/database/migrations/*.ts"],
     synchronize: false,
     logging: true,
@@ -71,3 +72,4 @@ export const initializeDatabase = async () => {
     isInitializing = false;
   }
 };
+
