@@ -14,8 +14,8 @@ export class User {
   @Column({ type: "varchar" })
   passwordHash!: string;
 
-  @Column({ type: "varchar", default: "tenant_admin" })
-  role!: "tenant_admin" | "student";
+  @Column({ type: "varchar", default: "student" })
+  role!: "platform_admin" | "tenant_admin" | "student";
 
   @Column({ type: "boolean", default: false })
   mustChangePassword!: boolean;
