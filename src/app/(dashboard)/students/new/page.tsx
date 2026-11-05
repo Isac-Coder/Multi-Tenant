@@ -53,7 +53,7 @@ export default function NewStudentPage() {
               <Input label="Teléfono" name="phone" placeholder="3000000000" />
 
               <label className="flex items-start gap-2 text-sm text-brand-text">
-                <input type="checkbox" name="generateAccount" value="true" className="mt-0.5" />
+                <input type="checkbox" name="generateAccount" value="true" className="mt-0.5" required />
                 <span>
                   Generar acceso para el estudiante
                   <span className="block text-xs text-brand-muted mt-0.5">Se mostrará una contraseña temporal que deberá cambiar al primer ingreso.</span>

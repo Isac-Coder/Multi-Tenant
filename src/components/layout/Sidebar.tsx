@@ -7,16 +7,23 @@ import {
   Building2, Settings, LogOut
 } from 'lucide-react';
 import { logoutAction } from '../../app/actions/auth';
+import { isStudentRole } from '@/lib/roles';
 
-const menuItems = [
-  { name: 'Dashboard',      icon: LayoutDashboard, href: '/' },
-  { name: 'Estudiantes',    icon: Users,            href: '/students' },
-  { name: 'Cursos',         icon: BookOpen,         href: '/courses' },
-  { name: 'Inscripciones',  icon: ClipboardList,    href: '/enrollment' },
-  { name: 'Tenants',        icon: Building2,        href: '/tenants' },
-];
+export const Sidebar = ({ userName, userEmail, userRole }: { userName: string; userEmail: string; userRole?: string }) => {
+  const menuItems = isStudentRole(userRole)
+    ? [
+        { name: 'Dashboard', icon: LayoutDashboard, href: '/' },
+        { name: 'Mis cursos', icon: BookOpen, href: '/courses' },
+        { name: 'Mis inscripciones', icon: ClipboardList, href: '/enrollment' },
+      ]
+    : [
+        { name: 'Dashboard', icon: LayoutDashboard, href: '/' },
+        { name: 'Estudiantes', icon: Users, href: '/students' },
+        { name: 'Cursos', icon: BookOpen, href: '/courses' },
+        { name: 'Inscripciones', icon: ClipboardList, href: '/enrollment' },
+        { name: 'Tenants', icon: Building2, href: '/tenants' },
+      ];
 
-export const Sidebar = ({ userName, userEmail }: { userName: string; userEmail: string }) => {
   const pathname = usePathname();
   const initials = userName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 

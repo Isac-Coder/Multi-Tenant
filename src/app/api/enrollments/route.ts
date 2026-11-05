@@ -3,14 +3,34 @@ import { Enrollment } from "@/entities/Enrollment";
 import { Course } from "@/entities/Course";
 import { Student } from "@/entities/Student";
 import { withProxy } from "@/lib/proxy";
+import { getSessionIdentity } from "@/lib/auth-session";
 
 export async function GET(req: NextRequest) {
-  return withProxy(req, async (req, tenantId) => {
+  return withProxy(req, async (req, tenantId, role) => {
     try {
       const { getTenantDataSource } = await import("@/database/tenant-data-source");
       const dataSource = await getTenantDataSource(tenantId);
       const enrollmentRepository = dataSource.getRepository(Enrollment);
-      const enrollments = await enrollmentRepository.find({ where: { tenantId } });
+      const studentRepository = dataSource.getRepository(Student);
+
+      const session = await getSessionIdentity();
+      const currentUserEmail = session?.email;
+
+      let where: { tenantId: string; studentId?: string } = { tenantId };
+
+      if (role === "student" && currentUserEmail) {
+        const student = await studentRepository.findOne({
+          where: { email: currentUserEmail, tenantId },
+        });
+
+        if (!student) {
+          return NextResponse.json([], { status: 200 });
+        }
+
+        where.studentId = String(student.id);
+      }
+
+      const enrollments = await enrollmentRepository.find({ where });
       return NextResponse.json(enrollments);
     } catch (error: any) {
       return NextResponse.json({ error: error.message }, { status: 500 });

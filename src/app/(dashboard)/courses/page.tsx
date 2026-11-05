@@ -1,10 +1,14 @@
 
 import { Plus, BookOpen, Users } from "lucide-react";
 import Link from "next/link";
+import { In } from "typeorm";
 import { Button } from "../../../components/ui/Button";
 import { Badge } from "../../../components/ui/Badge";
 import { Course } from "../../../entities/Course";
 import { Enrollment } from "../../../entities/Enrollment";
+import { Student } from "../../../entities/Student";
+import { getSessionIdentity } from "@/lib/auth-session";
+import { isStudentRole } from "@/lib/roles";
 
 const CARD_STYLES = [
   { bg: "bg-accent-light", text: "text-accent", bar: "bg-accent-mid" },
@@ -19,7 +23,33 @@ export const dynamic = "force-dynamic";
 export default async function CoursesPage() {
   const { getCurrentTenantDataSource } = await import("../../../database/tenant-data-source");
   const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
-  const courses = await AppDataSource.getRepository(Course).find({ order: { title: "ASC" } });
+  const session = await getSessionIdentity();
+  const isStudent = isStudentRole(session?.role);
+
+  let courses: Course[] = [];
+
+  if (isStudent && session) {
+    const student = await AppDataSource.getRepository(Student).findOne({
+      where: { email: session.email, tenantId: session.tenantId },
+    });
+
+    if (student) {
+      const studentEnrollments = await AppDataSource.getRepository(Enrollment).find({
+        where: { studentId: student.id, tenantId: session.tenantId },
+      });
+
+      const courseIds = studentEnrollments.map((enrollment) => enrollment.courseId);
+      courses = courseIds.length
+        ? await AppDataSource.getRepository(Course).find({
+            where: { id: In(courseIds) },
+            order: { title: "ASC" },
+          })
+        : [];
+    }
+  } else {
+    courses = await AppDataSource.getRepository(Course).find({ order: { title: "ASC" } });
+  }
+
   const enrollmentCounts = await AppDataSource.getRepository(Enrollment)
     .createQueryBuilder("enrollment")
     .select("enrollment.courseId", "courseId")
@@ -35,24 +65,32 @@ export default async function CoursesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[18px] font-medium text-brand-text">Cursos</h1>
-          <p className="text-[13px] text-brand-muted mt-0.5">{courses.length} cursos en el catálogo</p>
+          <h1 className="text-[18px] font-medium text-brand-text">{isStudent ? "Mis cursos" : "Cursos"}</h1>
+          <p className="text-[13px] text-brand-muted mt-0.5">
+            {isStudent ? `${courses.length} cursos inscritos` : `${courses.length} cursos en el catálogo`}
+          </p>
         </div>
-        <Link href="/courses/new">
-          <Button variant="primary">
-            <Plus className="w-4 h-4" /> Nuevo curso
-          </Button>
-        </Link>
+        {!isStudent && (
+          <Link href="/courses/new">
+            <Button variant="primary">
+              <Plus className="w-4 h-4" /> Nuevo curso
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Grid */}
       {courses.length === 0 ? (
         <div className="bg-surface-2 border border-brand-border rounded-card py-16 text-center">
           <p className="text-4xl mb-3">📚</p>
-          <p className="text-brand-muted text-sm mb-4">Sin cursos en el catálogo aún</p>
-          <Link href="/courses/new">
-            <Button variant="primary" size="sm"><Plus className="w-4 h-4" /> Crear primer curso</Button>
-          </Link>
+          <p className="text-brand-muted text-sm mb-4">
+            {isStudent ? "Todavía no tienes cursos inscritos" : "Sin cursos en el catálogo aún"}
+          </p>
+          {!isStudent && (
+            <Link href="/courses/new">
+              <Button variant="primary" size="sm"><Plus className="w-4 h-4" /> Crear primer curso</Button>
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-4">
@@ -88,15 +126,16 @@ export default async function CoursesPage() {
             );
           })}
 
-          {/* Add card */}
-          <Link href="/courses/new">
-            <div className="bg-surface-2 border-2 border-dashed border-brand-border rounded-card p-5
-                            flex flex-col items-center justify-center min-h-[200px] cursor-pointer
-                            hover:border-accent hover:bg-accent-light/30 transition-colors group">
-              <div className="text-3xl text-brand-hint group-hover:text-accent mb-2">+</div>
-              <p className="text-[13px] text-brand-hint group-hover:text-accent">Agregar curso</p>
-            </div>
-          </Link>
+          {!isStudent && (
+            <Link href="/courses/new">
+              <div className="bg-surface-2 border-2 border-dashed border-brand-border rounded-card p-5
+                              flex flex-col items-center justify-center min-h-[200px] cursor-pointer
+                              hover:border-accent hover:bg-accent-light/30 transition-colors group">
+                <div className="text-3xl text-brand-hint group-hover:text-accent mb-2">+</div>
+                <p className="text-[13px] text-brand-hint group-hover:text-accent">Agregar curso</p>
+              </div>
+            </Link>
+          )}
         </div>
       )}
     </div>

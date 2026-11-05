@@ -4,6 +4,9 @@ import { Button } from "../../../components/ui/Button";
 import { Plus, CheckCircle, ArrowRight, Info, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { Enrollment } from "../../../entities/Enrollment";
+import { Student } from "../../../entities/Student";
+import { getSessionIdentity } from "@/lib/auth-session";
+import { isStudentRole } from "@/lib/roles";
 
 const AVATAR_COLORS = [
   "bg-teal-bg text-teal","bg-purple-bg text-purple",
@@ -19,24 +22,47 @@ export const dynamic = "force-dynamic";
 export default async function EnrollmentsPage() {
   const { getCurrentTenantDataSource } = await import("../../../database/tenant-data-source");
   const { dataSource: AppDataSource } = await getCurrentTenantDataSource();
-  const enrollments = await AppDataSource.getRepository(Enrollment).find({
-    relations: { student: true, course: true },
-    order: { enrolledAt: "DESC" },
-  });
+  const session = await getSessionIdentity();
+  const isStudent = isStudentRole(session?.role);
+
+  let enrollments: Enrollment[] = [];
+
+  if (isStudent && session) {
+    const student = await AppDataSource.getRepository(Student).findOne({
+      where: { email: session.email, tenantId: session.tenantId },
+    });
+
+    if (student) {
+      enrollments = await AppDataSource.getRepository(Enrollment).find({
+        where: { studentId: student.id, tenantId: session.tenantId },
+        relations: { student: true, course: true },
+        order: { enrolledAt: "DESC" },
+      });
+    }
+  } else {
+    enrollments = await AppDataSource.getRepository(Enrollment).find({
+      relations: { student: true, course: true },
+      order: { enrolledAt: "DESC" },
+    });
+  }
 
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[18px] font-medium text-brand-text">Inscripciones</h1>
-          <p className="text-[13px] text-brand-muted mt-0.5">{enrollments.length} inscripciones registradas</p>
+          <h1 className="text-[18px] font-medium text-brand-text">{isStudent ? "Mis inscripciones" : "Inscripciones"}</h1>
+          <p className="text-[13px] text-brand-muted mt-0.5">
+            {isStudent ? `${enrollments.length} inscripciones activas` : `${enrollments.length} inscripciones registradas`}
+          </p>
         </div>
-        <Link href="/enrollment/new">
-          <Button variant="primary">
-            <Plus className="w-4 h-4" /> Nueva inscripción
-          </Button>
-        </Link>
+        {!isStudent && (
+          <Link href="/enrollment/new">
+            <Button variant="primary">
+              <Plus className="w-4 h-4" /> Nueva inscripción
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Tabs */}
@@ -61,10 +87,14 @@ export default async function EnrollmentsPage() {
         {enrollments.length === 0 ? (
           <div className="py-16 text-center">
             <ClipboardList className="w-10 h-10 text-brand-hint mx-auto mb-3 opacity-40" />
-            <p className="text-brand-muted text-sm mb-4">Sin inscripciones registradas aún</p>
-            <Link href="/enrollment/new">
-              <Button variant="primary" size="sm"><Plus className="w-4 h-4" /> Primera inscripción</Button>
-            </Link>
+            <p className="text-brand-muted text-sm mb-4">
+              {isStudent ? "Todavía no tienes inscripciones" : "Sin inscripciones registradas aún"}
+            </p>
+            {!isStudent && (
+              <Link href="/enrollment/new">
+                <Button variant="primary" size="sm"><Plus className="w-4 h-4" /> Primera inscripción</Button>
+              </Link>
+            )}
           </div>
         ) : (
           <table className="w-full">
