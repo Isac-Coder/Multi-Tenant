@@ -11,6 +11,8 @@ import { Student } from "../entities/Student.ts";
 import { Course } from "../entities/Course.ts";
 import { Enrollment } from "../entities/Enrollment.ts";
 import { User } from "../entities/User.ts";
+import { Init1793377016257 } from "./migrations/1793377016257-init.ts";
+import { AddCourseCapacity1793794000000 } from "./migrations/1793794000000-AddCourseCapacity.ts";
 
 
 let AppDataSource: DataSource;
@@ -24,7 +26,7 @@ if (typeof window === 'undefined') {
     url: process.env.DATABASE_URL,
     schema: "public",
     entities: [Tenant, Student, Course, Enrollment, User],
-    migrations: ["src/database/migrations/*.ts"],
+    migrations: [Init1793377016257, AddCourseCapacity1793794000000],
     synchronize: false,
     logging: true,
     extra: {
