@@ -49,3 +49,4 @@ La aplicación utiliza un proxy seguro para gestionar el acceso a los datos:
 
 ---
 Desarrollado por [Isac-Coder](https://github.com/Isac-Coder).
+
