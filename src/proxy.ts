@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-// Define the JWT secret - make sure this is set in your .env file
+
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'super-secret-key-change-me');
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Skip paths that don't need protection
+
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
@@ -22,12 +22,12 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/signup');
   const isPasswordChangeRoute = pathname === '/change-password';
 
-  // 2. Validate token if present
+
   let isAuthenticated = false;
   let mustChangePassword = false;
   if (token) {
     try {
-      // Step 1 of verification: Signature & Expiration
+
       const { payload } = await jwtVerify(token, SECRET);
       
       // Step 2 of verification: Could add further checks here 
