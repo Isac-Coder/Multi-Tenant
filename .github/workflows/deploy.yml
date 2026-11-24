@@ -35,11 +35,14 @@ jobs:
             --instance-ids "i-011df516f099f8ad9" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
-              "cd /home/ubuntu/Multi-Tenant && git pull origin main",
-              "cd /home/ubuntu/Multi-Tenant && npm install",
-              "cd /home/ubuntu/Multi-Tenant && npm run build",
+              "apt-get install -y awscli unzip -y 2>/dev/null || true",
+              "aws s3 cp s3://multi-tenant-deployments/deploy.zip /home/ubuntu/deploy.zip",
+              "cd /home/ubuntu && unzip -o deploy.zip -d app",
+              "cd /home/ubuntu/app && npm install",
+              "cd /home/ubuntu/app && npm run build",
               "pm2 delete multi-tenant 2>/dev/null || true",
-              "cd /home/ubuntu/Multi-Tenant && pm2 start npm --name multi-tenant -- start",
+              "cd /home/ubuntu/app && pm2 start npm --name multi-tenant -- start",
               "pm2 save"
             ]' \
             --region us-east-2
+
