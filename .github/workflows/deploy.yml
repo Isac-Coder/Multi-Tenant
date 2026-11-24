@@ -43,7 +43,7 @@ jobs:
               "pm2 delete multi-tenant 2>/dev/null || true",
               "cd /home/ubuntu/app && pm2 start npm --name multi-tenant -- start",
               "pm2 save"
-              "cd ~/ && rm deploy.zip"
+              "cd /home/ubuntu && rm deploy.zip"
               ]' \
             --region us-east-2
 
