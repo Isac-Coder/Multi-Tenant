@@ -42,7 +42,8 @@ jobs:
               "cd /home/ubuntu/app && npm run build",
               "pm2 delete multi-tenant 2>/dev/null || true",
               "cd /home/ubuntu/app && pm2 start npm --name multi-tenant -- start",
-              "pm2 save"
+              "pm2 save",
+              "cd /home/ubuntu/app && rm -f deploy.zip"
               ]' \
             --region us-east-2
 
