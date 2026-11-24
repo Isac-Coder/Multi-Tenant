@@ -9,9 +9,29 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  NODE_VERSION: "20"
+
 jobs:
+  verify:
+    name: Verify build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Verificar que el proyecto compila
+        run: npm run build
+
   deploy:
     name: Deploy
+    needs: verify
     runs-on: ubuntu-latest
 
     steps:
@@ -35,15 +55,15 @@ jobs:
             --instance-ids "i-011df516f099f8ad9" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
+              "apt-get update -y 2>/dev/null || true",
               "apt-get install -y awscli unzip -y 2>/dev/null || true",
               "aws s3 cp s3://multi-tenant-deployments/deploy.zip /home/ubuntu/deploy.zip",
               "cd /home/ubuntu && unzip -o deploy.zip -d app",
-              "cd /home/ubuntu/app && npm install",
+              "cd /home/ubuntu/app && npm ci --no-audit --no-fund",
               "cd /home/ubuntu/app && npm run build",
               "pm2 delete multi-tenant 2>/dev/null || true",
-              "cd /home/ubuntu/app && pm2 start npm --name multi-tenant -- start",
-              "pm2 save",
-              ]' \
+              "pm2 delete acadify 2>/dev/null || true",
+              "cd /home/ubuntu/app && pm2 start \"npm start\" --name acadify",
+              "pm2 save"
+            ]' \
             --region us-east-2
-
-
