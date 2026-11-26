@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "../ui/Button";
+import { Toggle } from "../ui/Toggle";
 
 export const Navbar = () => (
   <nav className="bg-surface-2 border-b border-brand-border px-6 h-[52px] flex items-center justify-between sticky top-0 z-50">
@@ -20,6 +21,7 @@ export const Navbar = () => (
       <Link href="/register">
         <Button variant="primary">Crear cuenta</Button>
       </Link>
+      <Toggle className="h-6 w-6 p-0" />
     </div>
   </nav>
 );
