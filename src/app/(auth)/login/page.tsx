@@ -21,15 +21,13 @@ export default function LoginPage() {
     <div className="min-h-screen bg-surface-0 flex items-center justify-center p-6">
       <div className="bg-surface-2 border border-brand-border rounded-[16px] p-9 w-[380px] shadow-sm">
 
-        {/* Logo */}
+        {/* Logo con imagen */}
         <div className="text-center mb-7">
-          <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center mx-auto mb-2.5">
-            <div className="grid grid-cols-2 gap-0.5 w-3.5 h-3.5">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="rounded-[2px] bg-white opacity-90 w-1.5 h-1.5" />
-              ))}
-            </div>
-          </div>
+          <img
+            src="/edu-tenant-logo.svg"
+            alt="EduTenant"
+            className="w-11 h-11 rounded-xl mx-auto mb-2.5"
+          />
           <h1 className="text-[17px] font-semibold text-brand-text">EduTenant</h1>
           <p className="text-xs text-brand-muted mt-0.5">Inicia sesión en tu academia</p>
         </div>
