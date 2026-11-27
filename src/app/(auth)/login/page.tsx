@@ -21,12 +21,12 @@ export default function LoginPage() {
     <div className="min-h-screen bg-surface-0 flex items-center justify-center p-6">
       <div className="bg-surface-2 border border-brand-border rounded-[16px] p-9 w-[380px] shadow-sm">
 
-        {/* Logo con imagen desde S3 */}
+        {/* Logo con imagen desde S3 (nuevo diseño) */}
         <div className="text-center mb-7">
           <img
-            src="https://tenant-s3-images-824508926751-us-east-2-an.s3.us-east-2.amazonaws.com/login-logo.png"
+            src="https://tenant-s3-images-824508926751-us-east-2-an.s3.us-east-2.amazonaws.com/nuevo-logo.png"
             alt="EduTenant"
-            className="w-11 h-11 rounded-xl mx-auto mb-2.5"
+            className="w-24 h-24 rounded-xl mx-auto mb-2.5 object-contain"
             style={{ maxWidth: '100%', height: 'auto' }}
           />
           <h1 className="text-[17px] font-semibold text-brand-text">EduTenant</h1>
