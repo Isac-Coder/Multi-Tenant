@@ -22,13 +22,31 @@ jobs:
           chmod 600 ~/.ssh/servidor.pem
           ssh-keyscan -H 3.135.192.130 >> ~/.ssh/known_hosts
 
+      - name: Detener aplicación y limpiar directorio
+        run: |
+          ssh -i ~/.ssh/servidor.pem ubuntu@3.135.192.130 << 'EOF'
+            cd /home/ubuntu/app
+            
+            # Detener PM2
+            pm2 delete multi-tenant 2>/dev/null || true
+            pm2 delete acadify 2>/dev/null || true
+            
+            # Remover .next build para limpiar completamente
+            rm -rf .next
+            
+            # Ajustar dueños y permisos - hacer todo escribible para ubuntu user
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/app
+            sudo chmod -R u+rwX /home/ubuntu/app
+            
+            echo "📁 Directorio preparado: permisos y dueños ajustados"
+          EOF
+
       - name: Sincronizar archivos via RSYNC
         run: |
-          rsync -avz --delete \
+          rsync -avz --delete --delete-delay \
             --exclude='.git' \
             --exclude='node_modules' \
             --exclude='function.zip' \
-            --exclude='.next/standalone' \
             -e "ssh -i ~/.ssh/servidor.pem" \
             . ubuntu@3.135.192.130:/home/ubuntu/app/
 
@@ -40,7 +58,7 @@ jobs:
             # Instalar dependencias con sudo
             sudo npm ci --no-audit --no-fund 2>/dev/null || true
             
-            # Build Next.js con sudo
+            # Build Next.js con sudo (para crear archivos con el usuario correcto)
             sudo npm run build 2>/dev/null || true
             
             # Reiniciar con PM2 usando sudo
